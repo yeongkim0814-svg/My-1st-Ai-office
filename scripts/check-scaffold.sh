@@ -202,13 +202,15 @@ WF=.github/workflows/pr-rules-check.yml
 if [ ! -f "$WF" ]; then
   fail 16 "$WF missing"
 else
-  python3 - "$WF" <<'PY' || fail 16 "$WF must be pull_request-triggered, advisory (continue-on-error), minimal permissions, and run: steps must not interpolate \${{ }}"
+  python3 - "$WF" <<'PY' || fail 16 "$WF must be pull_request-triggered, advisory (continue-on-error), minimal permissions, serialized per PR (concurrency), and run: steps must not interpolate \${{ }}"
 import yaml, sys, re
 d = yaml.safe_load(open(sys.argv[1]))
 on = d.get("on", d.get(True))
 ok = isinstance(on, dict) and "pull_request" in on and "pull_request_target" not in on
 perms = d.get("permissions", {})
 ok = ok and perms == {"contents": "read", "pull-requests": "write", "issues": "read"}
+c = d.get("concurrency")
+ok = ok and isinstance(c, dict) and "pull_request.number" in str(c.get("group", "")) and c.get("cancel-in-progress") is True
 jobs = d["jobs"].values()
 ok = ok and all(j.get("continue-on-error") is True for j in jobs)
 for j in jobs:

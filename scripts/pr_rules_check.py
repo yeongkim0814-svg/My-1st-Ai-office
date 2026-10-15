@@ -65,17 +65,31 @@ def is_trusted_issue(issue):
     return bool(issue) and issue.get("author_association") in TRUSTED
 
 
+def code(value, limit=200):
+    """신뢰할 수 없는 값(파일명·브랜치명)을 인라인 코드로 안전하게 감싼다.
+    백틱과 제어문자(개행 포함)를 없애 코드 범위를 벗어나 마크다운을 주입하지 못하게 한다."""
+    v = re.sub(r"[`\x00-\x1f\x7f]", "?", str(value))
+    if len(v) > limit:
+        v = v[:limit] + "…"
+    return f"`{v}`"
+
+
+def branch_issue_number(branch):
+    m = re.fullmatch(rf"[0-9A-Za-z_-]+/(\d+)-{SLUG}", branch)
+    return int(m.group(1)) if m else None
+
+
 def _res(id_, level, message):
     return {"id": id_, "level": level, "message": message}
 
 
 def check_branch(branch, prefixes):
     if branch.startswith("ccr-"):
-        return _res("branch", "note", f"세션 브랜치 `{branch}`: 규약 형식이 아니지만 위반으로 보지 않는다.")
+        return _res("branch", "note", f"세션 브랜치 {code(branch)}: 규약 형식이 아니지만 위반으로 보지 않는다.")
     m = re.fullmatch(rf"([0-9A-Za-z_-]+)/(\d+)-{SLUG}", branch)
     if m and m.group(1) in prefixes:
-        return _res("branch", "ok", f"브랜치명 `{branch}` 형식이 맞다.")
-    return _res("branch", "fail", f"브랜치명 `{branch}`이 `<접두어>/<이슈번호>-슬러그` 형식이 아니다 (접두어: {', '.join(prefixes)}).")
+        return _res("branch", "ok", f"브랜치명 {code(branch)} 형식이 맞다.")
+    return _res("branch", "fail", f"브랜치명 {code(branch)}이 `<접두어>/<이슈번호>-슬러그` 형식이 아니다 (접두어: {', '.join(prefixes)}).")
 
 
 def find_closes(body):
@@ -114,7 +128,7 @@ def check_scope(files, declared):
         return _res("scope", "fail", "Issue에 '수정 가능 경로'가 없거나 읽을 수 없다.")
     out = [f for f in files if not _is_protected(f) and not _covered(f, declared)]
     if out:
-        return _res("scope", "fail", "Issue의 수정 가능 경로 밖의 파일: " + ", ".join(f"`{f}`" for f in out))
+        return _res("scope", "fail", "Issue의 수정 가능 경로 밖의 파일: " + ", ".join(code(f) for f in out))
     return _res("scope", "ok", "보호 경로를 제외한 변경 파일이 모두 수정 가능 경로 안에 있다.")
 
 
@@ -124,13 +138,16 @@ def check_protected(files, declared):
         return _res("protected", "ok", "보호 경로를 건드리지 않았다.")
     bad = [f for f in touched if not _covered(f, declared)]
     if bad:
-        return _res("protected", "fail", "Issue가 선언하지 않은 보호 경로 변경: " + ", ".join(f"`{f}`" for f in bad))
+        return _res("protected", "fail", "Issue가 선언하지 않은 보호 경로 변경: " + ", ".join(code(f) for f in bad))
     return _res("protected", "ok", "보호 경로 변경이 Issue에 선언되어 있다.")
 
 
 def run_checks(pr):
     results = [check_branch(pr["branch"], pr["prefixes"])]
     number = find_closes(pr["body"])
+    bn = branch_issue_number(pr["branch"])
+    if results[0]["level"] == "ok" and bn is not None and number is not None and bn != number:
+        results[0] = _res("branch", "fail", f"브랜치의 이슈 번호 #{bn}와 본문의 `Closes #{number}`가 다르다.")
     results.append(check_closes(number, pr["issue"], pr.get("auto_generated", False)))
     if not is_trusted_issue(pr["issue"]):
         results.append(_res("scope", "skip", "신뢰할 수 있는 연결 Issue가 없어 건너뛰었다."))

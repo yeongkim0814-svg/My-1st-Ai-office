@@ -11,6 +11,11 @@ permissions:
   pull-requests: write
   issues: read
 
+# 같은 PR의 실행은 한 번에 하나만: 오래된 실행이 새 결과를 덮거나 댓글이 중복되는 것을 막는다
+concurrency:
+  group: pr-rules-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   check:
     runs-on: ubuntu-latest

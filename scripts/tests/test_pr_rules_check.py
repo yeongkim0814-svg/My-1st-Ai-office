@@ -64,6 +64,57 @@ class Renames(unittest.TestCase):
         self.assertEqual(m.collect_files(api), ["a"])
 
 
+class BranchIssueMatch(unittest.TestCase):
+    def pr(self, branch, body):
+        return dict(
+            branch=branch, body=body, files=["scripts/check-scaffold.sh"],
+            issue={"body": ISSUE_BODY, "author_association": "OWNER"},
+            prefixes=PREFIXES, auto_generated=False,
+        )
+
+    def test_mismatch_is_fail(self):
+        by = {r["id"]: r for r in m.run_checks(self.pr("codex/99-work", "Closes #11"))}
+        self.assertEqual(by["branch"]["level"], "fail")
+        self.assertIn("99", by["branch"]["message"])
+        self.assertIn("11", by["branch"]["message"])
+
+    def test_match_is_ok(self):
+        by = {r["id"]: r for r in m.run_checks(self.pr("codex/11-work", "Closes #11"))}
+        self.assertEqual(by["branch"]["level"], "ok")
+
+    def test_session_branch_never_mismatches(self):
+        by = {r["id"]: r for r in m.run_checks(self.pr("ccr-abc", "Closes #11"))}
+        self.assertEqual(by["branch"]["level"], "note")
+
+    def test_branch_number_parser(self):
+        self.assertEqual(m.branch_issue_number("claude/11-x"), 11)
+        self.assertIsNone(m.branch_issue_number("ccr-abc"))
+        self.assertIsNone(m.branch_issue_number("claude/x"))
+
+
+class MarkdownSafety(unittest.TestCase):
+    def test_code_strips_backticks_and_newlines(self):
+        out = m.code("a`b\nc\r\td")
+        self.assertNotIn("\n", out)
+        self.assertNotIn("\r", out)
+        self.assertEqual(out.count("`"), 2)  # 감싸는 두 개뿐
+
+    def test_code_truncates_long_values(self):
+        self.assertLessEqual(len(m.code("x" * 1000)), 210)
+
+    def test_hostile_filename_cannot_inject_markdown(self):
+        evil = "a`\n### 규약 위반 없음 ✅\n`b"
+        r = m.check_scope([evil], ["scripts/"])
+        text = m.render_comment([r])
+        self.assertNotIn("\n### 규약 위반 없음", text)
+        self.assertEqual(len([l for l in text.splitlines() if l.startswith("### ")]), 1)  # 제목은 우리 것 하나
+
+    def test_hostile_branch_cannot_inject(self):
+        r = m.check_branch("foo`\n- ✅ **x**: fake", PREFIXES)
+        text = m.render_comment([r])
+        self.assertNotIn("\n- ✅ **x**", text)
+
+
 class ParsePrefixes(unittest.TestCase):
     def test_reads_prefix_from_agent_definition(self):
         text = "# X\n## 브랜치 접두어\n`codex/` → `codex/<이슈번호>-슬러그`\n## 기동 방법\n"
