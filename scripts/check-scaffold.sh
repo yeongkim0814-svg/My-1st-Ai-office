@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 FAILS=()
-CHECKS=12
+CHECKS=13
 fail() { FAILS+=("check $1: $2"); }
 
 # 1. 필수 파일 존재
@@ -128,6 +128,24 @@ for f in agents/_template.md docs/protocol/handoff.md; do
   grep -qF '독립 검토자' "$f" 2>/dev/null \
     || fail 12 "$f must say who records conductor-authored PRs ('독립 검토자')"
 done
+
+# 13. Codex 시험 결과 반영 (Issue #8): 기동 방법·알려진 특성, 검증 명령 대체, 커밋 작성자 식별
+for s in '실제로 열어' '결과를 GitHub에 올리지 못' '@codex review' '미확인' '| #6 |'; do
+  grep -qF "$s" agents/codex.md 2>/dev/null || fail 13 "agents/codex.md must contain: $s"
+done
+for h in '## 검증 명령 대체' '## 커밋 작성자'; do
+  grep -qF "$h" docs/protocol/handoff.md 2>/dev/null || fail 13 "docs/protocol/handoff.md must contain heading: $h"
+done
+if [ -f .github/ISSUE_TEMPLATE/task.yml ]; then
+  python3 - <<'PY' || fail 13 "task.yml verify field must mention '기준 커밋' (no remote refs like origin/main)"
+import yaml, sys, json
+d = yaml.safe_load(open(".github/ISSUE_TEMPLATE/task.yml"))
+for b in d.get("body", []):
+    if b.get("id") == "verify":
+        sys.exit(0 if "기준 커밋" in json.dumps(b, ensure_ascii=False) else 1)
+sys.exit(1)
+PY
+fi
 
 if [ ${#FAILS[@]} -gt 0 ]; then
   printf 'FAIL: %s\n' "${FAILS[@]}"

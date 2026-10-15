@@ -67,6 +67,7 @@ body:
     id: verify
     attributes:
       label: 검증 방법 (실행할 명령과 기대 결과)
+      placeholder: "wc -l <파일> / git diff --name-only <기준 커밋>...HEAD  (origin/main 같은 원격 참조가 없는 환경이 있으니 기준 커밋을 쓰세요)"
     validations:
       required: true
   - type: input
