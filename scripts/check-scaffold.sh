@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 FAILS=()
-CHECKS=13
+CHECKS=14
 fail() { FAILS+=("check $1: $2"); }
 
 # 1. 필수 파일 존재
@@ -146,6 +146,16 @@ for b in d.get("body", []):
 sys.exit(1)
 PY
 fi
+
+# 14. 작성 에이전트 표기 경로 (Codex 리뷰 반영, PR #9): 템플릿 칸 + 기동 문구 + 누락 시 처리
+for s in '작성 에이전트' '기동 방식'; do
+  grep -qF "$s" .github/pull_request_template.md 2>/dev/null \
+    || fail 14 ".github/pull_request_template.md must have a field: $s"
+done
+grep -qF '작성 에이전트' agents/codex.md 2>/dev/null \
+  || fail 14 "agents/codex.md launch prompt must require '작성 에이전트' in the PR body"
+grep -qF '표기가 없으면' docs/protocol/handoff.md 2>/dev/null \
+  || fail 14 "docs/protocol/handoff.md must say how missing attribution is handled ('표기가 없으면')"
 
 if [ ${#FAILS[@]} -gt 0 ]; then
   printf 'FAIL: %s\n' "${FAILS[@]}"

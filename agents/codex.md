@@ -20,9 +20,9 @@ Issue가 선언한 경로뿐이다.
 
 ## 기동 방법
 **구현 (Codex 채팅에서 직접 요청)**
-ChatGPT의 Codex 채팅에 레포 URL과 Issue 수행 요청을 입력한다. 요청문에는 아래 세 가지를 반드시 넣는다.
+ChatGPT의 Codex 채팅에 레포 URL과 Issue 수행 요청을 입력한다. 요청문에는 아래 내용(PR을 실제로 열 것, `Closes #N`, 작성 에이전트·기동 방식 표기, PR URL 보고)을 반드시 넣는다.
 
-> https://github.com/<소유자>/<레포> 레포의 Issue #N을 수행해 줘. 먼저 AGENTS.md를 읽고 Issue가 선언한 경로만 수정해. 변경은 `codex/N-슬러그` 브랜치로 GitHub에 푸시하고 `main` 대상 PR을 **실제로 열어** 줘. 본문에 `Closes #N`을 넣고 PR URL을 알려줘. PR을 열지 못했다면 열지 못했다고 분명히 말해 줘.
+> https://github.com/<소유자>/<레포> 레포의 Issue #N을 수행해 줘. 먼저 AGENTS.md를 읽고 Issue가 선언한 경로만 수정해. 변경은 `codex/N-슬러그` 브랜치로 GitHub에 푸시하고 `main` 대상 PR을 **실제로 열어** 줘. 본문에 `Closes #N`을 넣고, 본문의 `작성 에이전트`와 `기동 방식` 칸에 `Codex`와 `Codex 채팅 직접 요청`을 적고, PR URL을 알려줘. PR을 열지 못했다면 열지 못했다고 분명히 말해 줘.
 
 - Codex 보고에 따르면 채팅에 연결된 관리형 클라우드 실행 환경에서 파일 수정과 로컬 검증을 하고, `git push`가 프록시 오류로 실패하면 GitHub 연결 도구(API)로 브랜치와 커밋을 게시해 PR을 만든다(Issue #6).
 - "PR 메타데이터를 생성했다"는 표현은 PR이 열렸다는 뜻이 **아니다.** 반드시 PR URL을 받고, 지휘자는 GitHub에서 PR이 실제로 있는지 확인한다.
