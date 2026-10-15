@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 FAILS=()
-CHECKS=11
+CHECKS=12
 fail() { FAILS+=("check $1: $2"); }
 
 # 1. 필수 파일 존재
@@ -113,6 +113,18 @@ HARD=$(grep -rnE 'agent:(claude|codex|gemini)|agents/(claude|codex|gemini)\.md' 
 # 11. 공개 레포: 신뢰할 수 없는 입력 규칙이 AGENTS.md와 README에 있어야 한다
 for f in AGENTS.md docs/protocol/README.md; do
   [ -f "$f" ] && { grep -qF '소유자·협업자' "$f" || fail 11 "untrusted-input rule (소유자·협업자) missing in $f"; }
+done
+
+# 12. 문서 우선순위·지휘자용 문서 표시·관찰 기록 작성 주체 (Issue #4)
+grep -qF '다른 모든 문서보다 우선' AGENTS.md 2>/dev/null \
+  || fail 12 "AGENTS.md must state that the Issue's editable paths override every other document"
+grep -qF 'docs/superpowers/' AGENTS.md 2>/dev/null \
+  || fail 12 "AGENTS.md must say docs/superpowers/ is for the conductor and is not followed"
+grep -qF '지휘자용' docs/superpowers/README.md 2>/dev/null \
+  || fail 12 "docs/superpowers/README.md must exist and say it is conductor-only (지휘자용)"
+for f in agents/_template.md docs/protocol/handoff.md; do
+  grep -qF '관찰 기록은 지휘자가 쓴다' "$f" 2>/dev/null \
+    || fail 12 "$f must say '관찰 기록은 지휘자가 쓴다'"
 done
 
 if [ ${#FAILS[@]} -gt 0 ]; then
