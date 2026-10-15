@@ -133,7 +133,8 @@ class SizeBounds(unittest.TestCase):
 
     def test_render_hard_cap(self):
         text = m.render_comment([{"id": "x", "level": "fail", "message": "y" * 200000}])
-        self.assertLess(len(text), 60000)
+        self.assertLessEqual(len(text), m.MAX_COMMENT)
+        self.assertLess(m.MAX_COMMENT, 65536)
         self.assertTrue(text.startswith(m.MARKER))
 
 
