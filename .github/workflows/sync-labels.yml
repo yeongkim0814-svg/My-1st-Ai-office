@@ -1,0 +1,28 @@
+name: sync-labels
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [".github/labels.yml"]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create or update labels from .github/labels.yml
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY' | while IFS=$'\t' read -r name color desc; do
+          import yaml
+          for l in yaml.safe_load(open(".github/labels.yml")):
+              print(f"{l['name']}\t{l['color']}\t{l['description']}")
+          PY
+            gh label create "$name" --color "$color" --description "$desc" --force
+          done
