@@ -20,7 +20,7 @@ Issue가 선언한 경로뿐이다.
 
 ## 기동 방법
 **구현 (Codex 채팅에서 직접 요청)**
-ChatGPT의 Codex 채팅에 레포 URL과 Issue 수행 요청을 입력한다. 요청문에는 아래 내용(PR을 실제로 열 것, `Closes #N`, 작성 에이전트·기동 방식 표기, PR URL 보고)을 반드시 넣는다.
+ChatGPT의 Codex 채팅에 레포 URL과 Issue 수행 요청을 입력한다. 아래 요청문은 표준 지시문(`AGENTS.md를 읽고 Issue #N을 수행하라.`)을 Codex용으로 확장한 **에이전트별 기동 문구**다. 요청문에는 아래 내용(PR을 실제로 열 것, `Closes #N`, 작성 에이전트·기동 방식 표기, PR URL 보고)을 반드시 넣는다.
 
 > https://github.com/<소유자>/<레포> 레포의 Issue #N을 수행해 줘. 먼저 AGENTS.md를 읽고 Issue가 선언한 경로만 수정해. 변경은 `codex/N-슬러그` 브랜치로 GitHub에 푸시하고 `main` 대상 PR을 **실제로 열어** 줘. 본문에 `Closes #N`을 넣고, 본문의 `작성 에이전트`와 `기동 방식` 칸에 `Codex`와 `Codex 채팅 직접 요청`을 적고, PR URL을 알려줘. PR을 열지 못했다면 열지 못했다고 분명히 말해 줘.
 

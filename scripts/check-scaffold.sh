@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 FAILS=()
-CHECKS=14
+CHECKS=15
 fail() { FAILS+=("check $1: $2"); }
 
 # 1. 필수 파일 존재
@@ -157,9 +157,21 @@ grep -qF '작성 에이전트' agents/codex.md 2>/dev/null \
 grep -qF '표기가 없으면' docs/protocol/handoff.md 2>/dev/null \
   || fail 14 "docs/protocol/handoff.md must say how missing attribution is handled ('표기가 없으면')"
 for f in agents/*.md; do
-  [ "$f" = "agents/_template.md" ] && continue
-  grep -qF '작성 에이전트' "$f" || fail 14 "$f launch instructions must mention '작성 에이전트'"
+  # '## 기동 방법' 섹션만 검사한다 (다른 섹션으로 옮겨져도 통과하지 않도록)
+  SEC=$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' "$f")
+  for s in '작성 에이전트' '기동 방식'; do
+    grep -qF "$s" <<<"$SEC" || fail 14 "$f '## 기동 방법' section must mention '$s'"
+  done
 done
+
+# 15. 표준 지시문과 에이전트별 기동 문구의 관계 (Codex 재검토 반영, PR #9)
+for f in docs/protocol/README.md .github/ISSUE_TEMPLATE/task.yml; do
+  grep -qF '에이전트별 기동 문구' "$f" 2>/dev/null \
+    || fail 15 "$f must tell users to append the '에이전트별 기동 문구' to the standard instruction"
+done
+SEC=$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' agents/_template.md 2>/dev/null)
+grep -qF '에이전트별 기동 문구' <<<"$SEC" \
+  || fail 15 "agents/_template.md '## 기동 방법' section must explain the '에이전트별 기동 문구'"
 
 if [ ${#FAILS[@]} -gt 0 ]; then
   printf 'FAIL: %s\n' "${FAILS[@]}"
