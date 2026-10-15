@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 FAILS=()
-CHECKS=15
+CHECKS=16
 fail() { FAILS+=("check $1: $2"); }
 
 # 1. 필수 파일 존재
@@ -196,6 +196,34 @@ fi
 SEC=$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' agents/_template.md 2>/dev/null)
 grep -qF '에이전트별 기동 문구' <<<"$SEC" \
   || fail 15 "agents/_template.md '## 기동 방법' section must explain the '에이전트별 기동 문구'"
+
+# 16. PR 규칙 검사 워크플로 (Issue #11): 알림 전용, 보안 규칙
+WF=.github/workflows/pr-rules-check.yml
+if [ ! -f "$WF" ]; then
+  fail 16 "$WF missing"
+else
+  python3 - "$WF" <<'PY' || fail 16 "$WF must be pull_request-triggered, advisory (continue-on-error), minimal permissions, and run: steps must not interpolate \${{ }}"
+import yaml, sys, re
+d = yaml.safe_load(open(sys.argv[1]))
+on = d.get("on", d.get(True))
+ok = isinstance(on, dict) and "pull_request" in on and "pull_request_target" not in on
+perms = d.get("permissions", {})
+ok = ok and perms == {"contents": "read", "pull-requests": "write", "issues": "read"}
+jobs = d["jobs"].values()
+ok = ok and all(j.get("continue-on-error") is True for j in jobs)
+for j in jobs:
+    for st in j["steps"]:
+        if "run" in st and "${{" in st["run"]:
+            ok = False
+        if "run" in st and st.get("shell") != "bash":
+            ok = False
+sys.exit(0 if ok else 1)
+PY
+fi
+PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover scripts/tests >/dev/null 2>&1 \
+  || fail 16 "python3 -m unittest discover scripts/tests must pass"
+grep -qF '병합을 막지 않' docs/protocol/README.md 2>/dev/null \
+  || fail 16 "docs/protocol/README.md must say the PR rules check is advisory ('병합을 막지 않')"
 
 if [ ${#FAILS[@]} -gt 0 ]; then
   printf 'FAIL: %s\n' "${FAILS[@]}"
