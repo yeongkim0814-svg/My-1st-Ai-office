@@ -115,6 +115,28 @@ class MarkdownSafety(unittest.TestCase):
         self.assertNotIn("\n- ✅ **x**", text)
 
 
+class SizeBounds(unittest.TestCase):
+    def test_code_list_truncates_and_reports_omitted(self):
+        out = m.code_list([f"p{i}" for i in range(100)], max_items=5)
+        self.assertEqual(out.count("`") // 2, 5)
+        self.assertIn("95", out)
+
+    def test_code_list_small_list_is_complete(self):
+        out = m.code_list(["a", "b"], max_items=5)
+        self.assertEqual(out, "`a`, `b`")
+
+    def test_many_long_paths_stay_under_github_limit(self):
+        files = ["x/" + "d" * 300 + str(i) for i in range(1000)]
+        text = m.render_comment([m.check_scope(files, ["scripts/"]), m.check_protected([".github/" + f for f in files], [])])
+        self.assertLess(len(text), 60000)
+        self.assertIn(m.MARKER, text)
+
+    def test_render_hard_cap(self):
+        text = m.render_comment([{"id": "x", "level": "fail", "message": "y" * 200000}])
+        self.assertLess(len(text), 60000)
+        self.assertTrue(text.startswith(m.MARKER))
+
+
 class ParsePrefixes(unittest.TestCase):
     def test_reads_prefix_from_agent_definition(self):
         text = "# X\n## 브랜치 접두어\n`codex/` → `codex/<이슈번호>-슬러그`\n## 기동 방법\n"

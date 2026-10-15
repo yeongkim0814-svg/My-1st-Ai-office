@@ -74,6 +74,18 @@ def code(value, limit=200):
     return f"`{v}`"
 
 
+def code_list(items, max_items=20):
+    """코드로 감싼 값들을 쉼표로 잇되 개수를 제한하고, 생략된 개수를 알린다 (댓글 길이 제한 대비)."""
+    items = list(items)
+    shown = ", ".join(code(i) for i in items[:max_items])
+    if len(items) > max_items:
+        shown += f" 외 {len(items) - max_items}개"
+    return shown
+
+
+MAX_COMMENT = 60000  # GitHub 댓글 한도(65,536자)보다 낮게
+
+
 def branch_issue_number(branch):
     m = re.fullmatch(rf"[0-9A-Za-z_-]+/(\d+)-{SLUG}", branch)
     return int(m.group(1)) if m else None
@@ -128,7 +140,7 @@ def check_scope(files, declared):
         return _res("scope", "fail", "Issue에 '수정 가능 경로'가 없거나 읽을 수 없다.")
     out = [f for f in files if not _is_protected(f) and not _covered(f, declared)]
     if out:
-        return _res("scope", "fail", "Issue의 수정 가능 경로 밖의 파일: " + ", ".join(code(f) for f in out))
+        return _res("scope", "fail", "Issue의 수정 가능 경로 밖의 파일: " + code_list(out))
     return _res("scope", "ok", "보호 경로를 제외한 변경 파일이 모두 수정 가능 경로 안에 있다.")
 
 
@@ -138,7 +150,7 @@ def check_protected(files, declared):
         return _res("protected", "ok", "보호 경로를 건드리지 않았다.")
     bad = [f for f in touched if not _covered(f, declared)]
     if bad:
-        return _res("protected", "fail", "Issue가 선언하지 않은 보호 경로 변경: " + ", ".join(code(f) for f in bad))
+        return _res("protected", "fail", "Issue가 선언하지 않은 보호 경로 변경: " + code_list(bad))
     return _res("protected", "ok", "보호 경로 변경이 Issue에 선언되어 있다.")
 
 
@@ -172,7 +184,11 @@ def render_comment(results):
     for r in results:
         msg = html.escape(r["message"], quote=False).replace("@", "@​")
         lines.append(f"- {ICON.get(r['level'], '•')} **{r['id']}**: {msg}")
-    return "\n".join(lines) + "\n"
+    text = "\n".join(lines) + "\n"
+    if len(text) > MAX_COMMENT:
+        tail = "\n…(길이 제한으로 잘림)\n"
+        text = text[: MAX_COMMENT - len(tail)] + tail
+    return text
 
 
 # --- 입출력 (네트워크) ---------------------------------------------------------
