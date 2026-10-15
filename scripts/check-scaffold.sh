@@ -4,7 +4,7 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 FAILS=()
-CHECKS=12
+CHECKS=15
 fail() { FAILS+=("check $1: $2"); }
 
 # 1. 필수 파일 존재
@@ -128,6 +128,65 @@ for f in agents/_template.md docs/protocol/handoff.md; do
   grep -qF '독립 검토자' "$f" 2>/dev/null \
     || fail 12 "$f must say who records conductor-authored PRs ('독립 검토자')"
 done
+
+# 13. Codex 시험 결과 반영 (Issue #8): 기동 방법·알려진 특성, 검증 명령 대체, 커밋 작성자 식별
+# 문구는 의미가 있는 섹션 안에서만 인정한다 (관찰 기록 등 다른 섹션의 같은 문구로 통과하지 않도록)
+sec() { awk -v h="## $2" 'index($0,h)==1{f=1;next} /^## /{f=0} f' "$1" 2>/dev/null; }
+LAUNCH=$(sec agents/codex.md '기동 방법')
+for s in '실제로 열어' '결과를 GitHub에 올리지 못' '@codex review' '미확인'; do
+  grep -qF "$s" <<<"$LAUNCH" || fail 13 "agents/codex.md '## 기동 방법' section must contain: $s"
+done
+grep -qF '| #6 |' <<<"$(sec agents/codex.md '관찰 기록')" \
+  || fail 13 "agents/codex.md '## 관찰 기록' section must contain the #6 row"
+for h in '## 검증 명령 대체' '## 커밋 작성자'; do
+  grep -qF "$h" docs/protocol/handoff.md 2>/dev/null || fail 13 "docs/protocol/handoff.md must contain heading: $h"
+done
+if [ -f .github/ISSUE_TEMPLATE/task.yml ]; then
+  python3 - <<'PY' || fail 13 "task.yml verify field must mention '기준 커밋' (no remote refs like origin/main)"
+import yaml, sys, json
+d = yaml.safe_load(open(".github/ISSUE_TEMPLATE/task.yml"))
+for b in d.get("body", []):
+    if b.get("id") == "verify":
+        sys.exit(0 if "기준 커밋" in json.dumps(b, ensure_ascii=False) else 1)
+sys.exit(1)
+PY
+fi
+
+# 14. 작성 에이전트 표기 경로 (Codex 리뷰 반영, PR #9): 템플릿 칸 + 기동 문구 + 누락 시 처리
+for s in '작성 에이전트' '기동 방식'; do
+  grep -qF "$s" .github/pull_request_template.md 2>/dev/null \
+    || fail 14 ".github/pull_request_template.md must have a field: $s"
+done
+grep -qF '작성 에이전트' agents/codex.md 2>/dev/null \
+  || fail 14 "agents/codex.md launch prompt must require '작성 에이전트' in the PR body"
+grep -qF '표기가 없으면' docs/protocol/handoff.md 2>/dev/null \
+  || fail 14 "docs/protocol/handoff.md must say how missing attribution is handled ('표기가 없으면')"
+for f in agents/*.md; do
+  # '## 기동 방법' 섹션만 검사한다 (다른 섹션으로 옮겨져도 통과하지 않도록)
+  SEC=$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' "$f")
+  for s in '작성 에이전트' '기동 방식'; do
+    grep -qF "$s" <<<"$SEC" || fail 14 "$f '## 기동 방법' section must mention '$s'"
+  done
+done
+
+# 15. 표준 지시문과 에이전트별 기동 문구의 관계 (Codex 재검토 반영, PR #9)
+grep -qF '에이전트별 기동 문구' docs/protocol/README.md 2>/dev/null \
+  || fail 15 "docs/protocol/README.md must tell users to append the '에이전트별 기동 문구' to the standard instruction"
+# Issue 템플릿: 제출 본문에 남는(markdown 제외) 필수(required) 체크박스 항목에 있어야 한다
+if [ -f .github/ISSUE_TEMPLATE/task.yml ]; then
+  python3 - <<'PY' || fail 15 "task.yml must require '에이전트별 기동 문구' in a submitted required checkbox option"
+import yaml, sys
+d = yaml.safe_load(open(".github/ISSUE_TEMPLATE/task.yml"))
+ok = any(b.get("type") == "checkboxes" and o.get("required") is True and "에이전트별 기동 문구" in str(o.get("label", ""))
+         for b in d.get("body", []) for o in b.get("attributes", {}).get("options", []))
+sys.exit(0 if ok else 1)
+PY
+else
+  fail 15 "task.yml missing"
+fi
+SEC=$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' agents/_template.md 2>/dev/null)
+grep -qF '에이전트별 기동 문구' <<<"$SEC" \
+  || fail 15 "agents/_template.md '## 기동 방법' section must explain the '에이전트별 기동 문구'"
 
 if [ ${#FAILS[@]} -gt 0 ]; then
   printf 'FAIL: %s\n' "${FAILS[@]}"

@@ -1,5 +1,9 @@
 Closes #
 
+## 작성 에이전트
+- 작성 에이전트: <!-- 예: Codex, Gemini(Jules), Claude -->
+- 기동 방식: <!-- 예: Codex 채팅 직접 요청, Jules 화면, 사용자 세션 -->
+
 ## 요약
 
 ## 변경 파일

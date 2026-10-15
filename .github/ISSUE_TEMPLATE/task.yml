@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        **에이전트를 띄울 때 이 문장을 그대로 쓰세요:** `AGENTS.md를 읽고 Issue #N을 수행하라.`
+        **에이전트를 띄울 때 이 문장을 기본으로 쓰고, 해당 에이전트의 `agents/<이름>.md` "기동 방법"에 적힌 에이전트별 기동 문구를 덧붙이세요:** `AGENTS.md를 읽고 Issue #N을 수행하라.`
 
         핵심 규칙: 브랜치명은 `<에이전트>/<이슈번호>-슬러그`, 아래 수정 가능 경로 밖은 건드리지 않기, PR에는 실행한 명령과 실제 출력을 붙이기.
   - type: checkboxes
@@ -14,6 +14,8 @@ body:
       label: 작업 규칙 (이 Issue를 수행하는 에이전트는 아래를 지킵니다)
       options:
         - label: "표준 지시문: AGENTS.md를 읽고 Issue #N을 수행하라."
+          required: true
+        - label: "에이전트별 기동 문구: 지시문에 해당 에이전트의 agents/<이름>.md '기동 방법' 문구를 덧붙인다."
           required: true
         - label: "브랜치명은 <에이전트>/<이슈번호>-슬러그, 작업은 PR로 보고하며 Closes #N을 쓴다."
           required: true
@@ -67,6 +69,7 @@ body:
     id: verify
     attributes:
       label: 검증 방법 (실행할 명령과 기대 결과)
+      placeholder: "wc -l <파일> / git diff --name-only <기준 커밋>...HEAD  (origin/main 같은 원격 참조가 없는 환경이 있으니 기준 커밋을 쓰세요)"
     validations:
       required: true
   - type: input
