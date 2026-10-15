@@ -34,6 +34,36 @@ class ParseIssuePaths(unittest.TestCase):
         self.assertEqual(m.parse_issue_paths(body), ["a/b.md", "c/"])
 
 
+class FormHeading(unittest.TestCase):
+    def test_reads_heading_generated_by_issue_form(self):
+        # Issue 양식은 필드 label 전체를 제목으로 만든다
+        body = "### 목표\nx\n\n### 수정 가능 경로 (한 줄에 경로 하나)\n\nscripts/a.py\nscripts/tests/\n\n### 완료 조건\n1. y"
+        self.assertEqual(m.parse_issue_paths(body), ["scripts/a.py", "scripts/tests/"])
+
+    def test_other_headings_with_similar_start_are_not_mixed(self):
+        body = "### 수정 가능 경로 메모\nnot/a/path\n### 수정 가능 경로\nreal/path\n"
+        self.assertEqual(m.parse_issue_paths(body), ["real/path"])
+
+
+class Renames(unittest.TestCase):
+    def test_collects_new_and_previous_names(self):
+        api = [
+            {"filename": "scripts/x.yml", "previous_filename": ".github/workflows/x.yml", "status": "renamed"},
+            {"filename": "a.md", "status": "modified"},
+        ]
+        self.assertEqual(m.collect_files(api), ["scripts/x.yml", ".github/workflows/x.yml", "a.md"])
+
+    def test_rename_out_of_protected_path_is_flagged(self):
+        files = m.collect_files([{"filename": "scripts/x.yml", "previous_filename": ".github/workflows/x.yml"}])
+        r = m.check_protected(files, ["scripts/"])
+        self.assertEqual(r["level"], "fail")
+        self.assertIn(".github/workflows/x.yml", r["message"])
+
+    def test_no_duplicates(self):
+        api = [{"filename": "a", "previous_filename": "a"}]
+        self.assertEqual(m.collect_files(api), ["a"])
+
+
 class ParsePrefixes(unittest.TestCase):
     def test_reads_prefix_from_agent_definition(self):
         text = "# X\n## 브랜치 접두어\n`codex/` → `codex/<이슈번호>-슬러그`\n## 기동 방법\n"
@@ -82,7 +112,7 @@ class Closes(unittest.TestCase):
         self.assertEqual(m.check_closes(99, None)["level"], "fail")
 
     def test_check_ok(self):
-        self.assertEqual(m.check_closes(99, {"body": ISSUE_BODY})["level"], "ok")
+        self.assertEqual(m.check_closes(99, {"body": ISSUE_BODY, "author_association": "OWNER"})["level"], "ok")
 
 
 class Scope(unittest.TestCase):
@@ -145,7 +175,7 @@ class Report(unittest.TestCase):
             branch="claude/11-x",
             body="Closes #11",
             files=["scripts/check-scaffold.sh"],
-            issue={"body": ISSUE_BODY},
+            issue={"body": ISSUE_BODY, "author_association": "OWNER"},
             prefixes=PREFIXES,
             auto_generated=False,
         )
@@ -172,6 +202,23 @@ class Report(unittest.TestCase):
         self.assertEqual(by["closes"], "fail")
         self.assertEqual(by["scope"], "skip")
         self.assertEqual(by["protected"], "skip")
+
+    def test_untrusted_issue_author_is_not_authority(self):
+        issue = {"body": ISSUE_BODY, "author_association": "NONE"}
+        results = m.run_checks(self.pr(issue=issue, files=["README.md"]))
+        by = {r["id"]: r["level"] for r in results}
+        self.assertEqual(by["closes"], "fail")
+        self.assertEqual(by["scope"], "skip")
+        self.assertEqual(by["protected"], "skip")
+
+    def test_trusted_associations(self):
+        for a in ("OWNER", "MEMBER", "COLLABORATOR"):
+            issue = {"body": ISSUE_BODY, "author_association": a}
+            self.assertEqual(m.run_checks(self.pr(issue=issue))[1]["level"], "ok", a)
+
+    def test_missing_association_is_untrusted(self):
+        issue = {"body": ISSUE_BODY}
+        self.assertEqual(m.run_checks(self.pr(issue=issue))[1]["level"], "fail")
 
     def test_message_escapes_markdown_html(self):
         text = m.render_comment([{"id": "x", "level": "fail", "message": "<script>@user</script>"}])

@@ -22,7 +22,9 @@ def parse_issue_paths(body):
     paths, on = [], False
     for line in (body or "").splitlines():
         if line.startswith("### "):
-            on = line.strip() == "### 수정 가능 경로"
+            # Issue 양식은 필드 label 전체("수정 가능 경로 (한 줄에 경로 하나)")를 제목으로 만든다
+            h = line[4:].strip()
+            on = h == "수정 가능 경로" or h.startswith("수정 가능 경로 (")
             continue
         if on:
             p = re.sub(r"^\s*[-*]\s+", "", line).strip().strip("`").strip()
@@ -43,6 +45,24 @@ def parse_prefix(agent_md):
             if m:
                 return m.group(1)
     return None
+
+
+def collect_files(api_files):
+    """변경 파일 목록. 이름이 바뀐 파일은 이전 경로도 검사 대상에 넣는다."""
+    out = []
+    for f in api_files:
+        for name in (f.get("filename"), f.get("previous_filename")):
+            if name and name not in out:
+                out.append(name)
+    return out
+
+
+TRUSTED = {"OWNER", "MEMBER", "COLLABORATOR"}
+
+
+def is_trusted_issue(issue):
+    """소유자·협업자가 만든 Issue만 경로의 근거로 쓴다 (AGENTS.md의 신뢰 규칙)."""
+    return bool(issue) and issue.get("author_association") in TRUSTED
 
 
 def _res(id_, level, message):
@@ -70,6 +90,8 @@ def check_closes(number, issue, auto_generated=False):
         return _res("closes", "fail", "본문에 `Closes #N`이 없다.")
     if issue is None:
         return _res("closes", "fail", f"`Closes #{number}`의 Issue를 찾을 수 없다.")
+    if not is_trusted_issue(issue):
+        return _res("closes", "fail", f"Issue #{number}의 작성자가 소유자·협업자가 아니어서 경로의 근거로 쓰지 않는다.")
     return _res("closes", "ok", f"`Closes #{number}`가 있고 Issue가 존재한다.")
 
 
@@ -110,9 +132,9 @@ def run_checks(pr):
     results = [check_branch(pr["branch"], pr["prefixes"])]
     number = find_closes(pr["body"])
     results.append(check_closes(number, pr["issue"], pr.get("auto_generated", False)))
-    if pr["issue"] is None:
-        results.append(_res("scope", "skip", "연결된 Issue가 없어 건너뛰었다."))
-        results.append(_res("protected", "skip", "연결된 Issue가 없어 건너뛰었다."))
+    if not is_trusted_issue(pr["issue"]):
+        results.append(_res("scope", "skip", "신뢰할 수 있는 연결 Issue가 없어 건너뛰었다."))
+        results.append(_res("protected", "skip", "신뢰할 수 있는 연결 Issue가 없어 건너뛰었다."))
     else:
         declared = parse_issue_paths(pr["issue"].get("body", ""))
         results.append(check_scope(pr["files"], declared))
@@ -177,7 +199,7 @@ def main():
     number = int(os.environ["PR_NUMBER"])
     api = f"https://api.github.com/repos/{repo}"
     pr = _api("GET", f"{api}/pulls/{number}", token)
-    files = [f["filename"] for f in _paged(f"{api}/pulls/{number}/files", token)]
+    files = collect_files(_paged(f"{api}/pulls/{number}/files", token))
     body = pr.get("body") or ""
     closes = find_closes(body)
     issue = None
