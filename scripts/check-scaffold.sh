@@ -153,21 +153,26 @@ PY
 fi
 
 # 14. 작성 에이전트 표기 경로 (Codex 리뷰 반영, PR #9): 템플릿 칸 + 기동 문구 + 누락 시 처리
+# 에이전트 파일의 '## 기동 방법' 섹션 본문. _template.md가 아니면 파일 전체에서 HTML 주석을 먼저 제거한다
+# (섹션 경계를 넘는 주석, 닫히지 않은 주석도 제거 대상이다. Issue #10, PR #12 리뷰 반영)
+launch_section() {
+  local f="$1" body
+  body=$(cat "$f")
+  if [ "$(basename "$f")" != "_template.md" ]; then
+    body=$(python3 -c 'import re,sys; sys.stdout.write(re.sub(r"<!--.*?(?:-->|\Z)","",sys.stdin.read(),flags=re.S))' <<<"$body")
+  fi
+  awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' <<<"$body"
+}
 for s in '작성 에이전트' '기동 방식'; do
   grep -qF "$s" .github/pull_request_template.md 2>/dev/null \
     || fail 14 ".github/pull_request_template.md must have a field: $s"
 done
-grep -qF '작성 에이전트' <<<"$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' agents/codex.md 2>/dev/null)" \
+grep -qF '작성 에이전트' <<<"$(launch_section agents/codex.md 2>/dev/null)" \
   || fail 14 "agents/codex.md launch prompt must require '작성 에이전트' in the PR body"
 grep -qF '표기가 없으면' docs/protocol/handoff.md 2>/dev/null \
   || fail 14 "docs/protocol/handoff.md must say how missing attribution is handled ('표기가 없으면')"
 for f in agents/*.md; do
-  # '## 기동 방법' 섹션만 검사한다 (다른 섹션으로 옮겨져도 통과하지 않도록)
-  SEC=$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' "$f")
-  # _template.md는 안내가 주석 안에 있다. 그 밖의 파일은 HTML 주석을 제거하고 본문만 검사한다 (Issue #10)
-  if [ "$(basename "$f")" != "_template.md" ]; then
-    SEC=$(python3 -c 'import re,sys; sys.stdout.write(re.sub(r"<!--.*?-->","",sys.stdin.read(),flags=re.S))' <<<"$SEC")
-  fi
+  SEC=$(launch_section "$f")
   for s in '작성 에이전트' '기동 방식'; do
     grep -qF "$s" <<<"$SEC" || fail 14 "$f '## 기동 방법' section must mention '$s'"
   done
