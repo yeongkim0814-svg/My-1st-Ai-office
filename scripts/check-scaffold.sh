@@ -125,6 +125,8 @@ grep -qF '지휘자용' docs/superpowers/README.md 2>/dev/null \
 for f in agents/_template.md docs/protocol/handoff.md; do
   grep -qF '관찰 기록은 지휘자가 쓴다' "$f" 2>/dev/null \
     || fail 12 "$f must say '관찰 기록은 지휘자가 쓴다'"
+  grep -qF '독립 검토자' "$f" 2>/dev/null \
+    || fail 12 "$f must say who records conductor-authored PRs ('독립 검토자')"
 done
 
 if [ ${#FAILS[@]} -gt 0 ]; then
