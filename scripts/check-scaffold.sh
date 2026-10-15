@@ -165,10 +165,20 @@ for f in agents/*.md; do
 done
 
 # 15. 표준 지시문과 에이전트별 기동 문구의 관계 (Codex 재검토 반영, PR #9)
-for f in docs/protocol/README.md .github/ISSUE_TEMPLATE/task.yml; do
-  grep -qF '에이전트별 기동 문구' "$f" 2>/dev/null \
-    || fail 15 "$f must tell users to append the '에이전트별 기동 문구' to the standard instruction"
-done
+grep -qF '에이전트별 기동 문구' docs/protocol/README.md 2>/dev/null \
+  || fail 15 "docs/protocol/README.md must tell users to append the '에이전트별 기동 문구' to the standard instruction"
+# Issue 템플릿: 제출 본문에 남는(markdown 제외) 필수(required) 체크박스 항목에 있어야 한다
+if [ -f .github/ISSUE_TEMPLATE/task.yml ]; then
+  python3 - <<'PY' || fail 15 "task.yml must require '에이전트별 기동 문구' in a submitted required checkbox option"
+import yaml, sys
+d = yaml.safe_load(open(".github/ISSUE_TEMPLATE/task.yml"))
+ok = any(b.get("type") == "checkboxes" and o.get("required") is True and "에이전트별 기동 문구" in str(o.get("label", ""))
+         for b in d.get("body", []) for o in b.get("attributes", {}).get("options", []))
+sys.exit(0 if ok else 1)
+PY
+else
+  fail 15 "task.yml missing"
+fi
 SEC=$(awk '/^## 기동 방법/{f=1;next} /^## /{f=0} f' agents/_template.md 2>/dev/null)
 grep -qF '에이전트별 기동 문구' <<<"$SEC" \
   || fail 15 "agents/_template.md '## 기동 방법' section must explain the '에이전트별 기동 문구'"
