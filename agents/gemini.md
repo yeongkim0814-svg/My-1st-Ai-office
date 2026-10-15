@@ -20,7 +20,9 @@ Issue가 선언한 경로뿐이다.
 ## 기동 방법
 - **구현 (Jules)**: **사용자가 Jules 화면에서** 이 레포를 선택하고 표준 지시문을 입력한다. 지휘자는 GitHub에서 직접 시킬 수 없다(아래 알려진 특성).
 
-  > AGENTS.md를 읽고 Issue #N을 수행하라.
+  > AGENTS.md를 읽고 Issue #N을 수행하라. PR 설명에 `작성 에이전트: Gemini(Jules)`와 `기동 방식: Jules 화면`을 포함해 줘.
+
+  Jules는 PR을 자동 생성하므로 이 요청이 PR 본문에 **반영되지 않을 수 있다**(효과 미확인). 반영되지 않으면 자동 생성 서명("PR created automatically by Jules")과 브랜치 접두어로 작성자를 판단한다(`docs/protocol/handoff.md` "커밋 작성자").
 
 - **수정 지시**: 검토에서 반려되면 지휘자의 PR 댓글을 사용자가 **Jules 화면의 후속 지시로 옮겨 전달**한다.
 - **보조 리뷰**: Gemini Code Assist GitHub 앱을 설치하면 PR이 열릴 때 자동으로 검토한다. PR 댓글에 `/gemini review`를 달아 수동으로 호출할 수도 있다.

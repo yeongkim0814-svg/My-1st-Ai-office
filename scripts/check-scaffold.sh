@@ -156,6 +156,10 @@ grep -qF '작성 에이전트' agents/codex.md 2>/dev/null \
   || fail 14 "agents/codex.md launch prompt must require '작성 에이전트' in the PR body"
 grep -qF '표기가 없으면' docs/protocol/handoff.md 2>/dev/null \
   || fail 14 "docs/protocol/handoff.md must say how missing attribution is handled ('표기가 없으면')"
+for f in agents/*.md; do
+  [ "$f" = "agents/_template.md" ] && continue
+  grep -qF '작성 에이전트' "$f" || fail 14 "$f launch instructions must mention '작성 에이전트'"
+done
 
 if [ ${#FAILS[@]} -gt 0 ]; then
   printf 'FAIL: %s\n' "${FAILS[@]}"
