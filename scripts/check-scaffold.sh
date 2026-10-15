@@ -130,9 +130,14 @@ for f in agents/_template.md docs/protocol/handoff.md; do
 done
 
 # 13. Codex 시험 결과 반영 (Issue #8): 기동 방법·알려진 특성, 검증 명령 대체, 커밋 작성자 식별
-for s in '실제로 열어' '결과를 GitHub에 올리지 못' '@codex review' '미확인' '| #6 |'; do
-  grep -qF "$s" agents/codex.md 2>/dev/null || fail 13 "agents/codex.md must contain: $s"
+# 문구는 의미가 있는 섹션 안에서만 인정한다 (관찰 기록 등 다른 섹션의 같은 문구로 통과하지 않도록)
+sec() { awk -v h="## $2" 'index($0,h)==1{f=1;next} /^## /{f=0} f' "$1" 2>/dev/null; }
+LAUNCH=$(sec agents/codex.md '기동 방법')
+for s in '실제로 열어' '결과를 GitHub에 올리지 못' '@codex review' '미확인'; do
+  grep -qF "$s" <<<"$LAUNCH" || fail 13 "agents/codex.md '## 기동 방법' section must contain: $s"
 done
+grep -qF '| #6 |' <<<"$(sec agents/codex.md '관찰 기록')" \
+  || fail 13 "agents/codex.md '## 관찰 기록' section must contain the #6 row"
 for h in '## 검증 명령 대체' '## 커밋 작성자'; do
   grep -qF "$h" docs/protocol/handoff.md 2>/dev/null || fail 13 "docs/protocol/handoff.md must contain heading: $h"
 done
