@@ -1,0 +1,33 @@
+name: pr-rules-check
+
+# 알림 전용: 규약 위반 후보를 PR 댓글 하나로 알린다. 병합을 막지 않는다 (continue-on-error).
+# 공개 레포 보안상 base 쓰기 토큰을 PR 코드에 넘기지 않는다. 스크립트는 base 커밋에서 가져와 PR이 검사기를 바꾸지 못하게 한다.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+# 같은 PR의 실행은 한 번에 하나만: 오래된 실행이 새 결과를 덮거나 댓글이 중복되는 것을 막는다
+concurrency:
+  group: pr-rules-check-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+      - name: Check PR against protocol rules (advisory)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python3 scripts/pr_rules_check.py
