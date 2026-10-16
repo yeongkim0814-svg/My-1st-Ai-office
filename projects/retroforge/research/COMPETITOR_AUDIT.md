@@ -22,7 +22,7 @@
 | 3 | **PSX Look** (heyheythere, 유료) | **$5.99** | 정점 스냅, 아핀, 240p 해상도, 디더링, 15비트 색, **프리셋 10개**. Godot 4와 Unity용 | 유료판의 렌더러 정보 ✕ | △ (번들 목록 문구) |
 | 4 | **PSX Visuals - GD4 Port** (scolastico) | 무료, **MIT** | 정점 스냅, 아핀, 안개, 화면 공간 디더링, 전역 셰이더 변수, **런타임 머티리얼 자동 변환(선택)** | Godot 4.1 이상. 버전 표기가 2.0.0과 2.1.3으로 다름 | △ ([Asset Library](https://godotengine.org/asset-library/asset/4687)) |
 | 5 | **PS1 / PSX Visuals** (snotbane) | 무료, **Unlicense** | 정점 스냅, 정점 안개, 아핀, 구로 셰이딩, 비트 깊이 감소와 디더링 | Godot 4.0, v1.5.0 | △ ([GitHub](https://github.com/snotbane/psx_visuals)) |
-| 6 | **godot-psx** (AnalogFeelings) | 무료, **MIT** | 소규모 셰이더 모음, 디더링 | Godot 4.0. 구로 셰이딩이 4.x에서 깨져 있다고 저자가 경고 | △ ([GitHub](https://github.com/AnalogFeelings/godot-psx)) |
+| 6 | **godot-psx** (AnalogFeelings) | 무료, **MIT** | 소규모 셰이더 모음, 디더링 | README는 Godot 4.x 대상이라고 밝힘(검토 의견 인용). 이전에 적었던 "구로 셰이딩이 4.x에서 깨졌다는 저자 경고"는 **출처를 확인하지 못해 삭제**함 | △ ([GitHub](https://github.com/AnalogFeelings/godot-psx)) |
 | 7 | **godot-psx-style-demo** (MenacingMecha) | 무료(데모 프로젝트) | 정점 스냅, 아핀, 색 깊이, 디더링, 안개. 수동 설정 | Godot 4.x, 브라우저 데모 | △ ([GitHub](https://github.com/MenacingMecha/godot-psx-style-demo)) |
 | 8 | **Ultimate Retro Shader Collection** (zorochase) | 가격 ✕ (무료로 표기한 결과가 있음) | 정점 스냅, 아핀, N64 3점 필터, 거리 텍스처 LOD, 안개. 편집기 스크립트가 전역 변수를 추가 | Godot 4 | △ ([itch](https://zorochase.itch.io/ultimate-retro-shader-collection-for-godot)) |
 | 9 | **Retro Shaders Pro for Godot** (Daniel Ilett) | **최소 $15.99** | PS1 아핀·정점 스냅, N64 필터, CRT/VHS 후처리, 픽셀화, 텍셀 정렬 조명 | **모든 렌더러, 단 텍셀 정렬 조명은 Compatibility에서 제대로 안 됨.** Godot 4.5+만 보증 | ○ ([itch](https://danielilett.itch.io/retro-shaders-pro-for-godot)) |
@@ -38,7 +38,7 @@
 2. **"웹과 렌더러(Compatibility·Mobile·Forward+)에서도 동작" 주장은 무료 제품이 이미 한다.** PSX Look Free와 PSX Godot Shader가 모든 렌더러(웹·데스크톱·모바일 표기)를 시험했다고 표기하고 브라우저 데모를 제공한다. 다만 **이 근거는 Godot의 `Mobile` 렌더링 방식과 일반적인 "모바일" 표기이지, Android 내보내기나 Android 실기기 시험을 명시한 것이 아니다.** 따라서 선점된 것은 **웹·렌더러 지원**이고, **Android 실기기 지원**은 선점 여부를 확인하지 못했다 ✕.
 3. **"무료 Lite + 유료 Pro" 구조도 이미 쓰인다.** PSX Look(무료판과 유료판), inkharbor의 번들(13개 도구 중 11개에 무료 Lite). 우리의 판매 구조는 차별점이 아니다.
 4. **가격대는 대략 한 자릿수 달러 중반에서 $15.99까지 넓다고 보인다.** 유사 기능 묶음(3번)이 $5.99이고, 후처리까지 묶은 상위 제품(9번)이 최소 $15.99다. 후처리 제품(10~12번)의 정확한 가격은 위 표대로 불확실하다. $9.99는 그 사이에 있지만 위 사실 1~2를 이길 이유가 필요하다.
-5. **공개된 한계 표기가 있다.** 9번은 텍셀 정렬 조명이 Compatibility에서 안 된다고 밝혔고, 6번은 구로 셰이딩이 깨졌다고 밝혔다. 버전 보증 범위도 4.0, 4.1+, 4.3~4.7, 4.5+, 4.7(HorrorScreenFX)로 제각각이다.
+5. **공개된 한계 표기가 있다.** 9번은 텍셀 정렬 조명이 Compatibility에서 안 된다고 밝혔다. 버전 보증 범위도 4.0, 4.1+, 4.3~4.7, 4.5+, 4.7(HorrorScreenFX)로 제각각이다.
 6. **성능 수치(프레임 시간)를 공개한 제품을 이번 조사에서는 찾지 못했다 ✕.** 다만 상품 페이지를 직접 읽지 못했으므로 "없다"가 아니라 "확인하지 못했다"이다.
 
 ## 3. 미충족 문제 (근거가 약함)
