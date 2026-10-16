@@ -75,7 +75,7 @@ v0.1과 달라진 점이 핵심이다.
 | 병합 | Claude가 결정 | **사용자만 병합.** Claude는 의견만 낸다 |
 | 브랜치 | `feat/...`, `fix/...` | `<에이전트>/<이슈번호>-슬러그` |
 | Issue 양식 | 자체 8항목 | `.github/ISSUE_TEMPLATE/task.yml` 사용 |
-| 검토자 | Gemini 독립 리뷰 | 자기 PR은 자기가 검토하지 않음. **Claude와 Jules가 쓴 PR은 Codex가, Codex가 쓴 PR은 Claude가 검토** |
+| 검토자 | Gemini 독립 리뷰 | 자기 PR은 자기가 검토하지 않음. 원본 규약(`docs/protocol/lifecycle.md` 4항)을 그대로 따른다: **Claude 외 에이전트(Codex, Jules)가 쓴 PR은 Claude가, Claude가 쓴 PR은 다른 에이전트(`@codex review` 또는 자동 리뷰 앱)가 1차 검토** |
 | Gemini | 상시 독립 리뷰어 | Jules를 통한 작은 구현·문서 과업. 사용자가 Jules 화면에서 시작해야 함. 상시 리뷰어로 쓰지 않음 |
 | Codex | 구현 | 구현은 채팅에서 "PR을 실제로 열어 달라"고 요청. 리뷰는 `@codex review` |
 | 자동 검사 | 없음 | PR 규칙 검사 Action(알림 전용)이 브랜치명·`Closes #N`·수정 가능 경로·보호 경로를 알린다 |
