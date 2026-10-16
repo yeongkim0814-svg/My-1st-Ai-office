@@ -28,7 +28,7 @@
 | 9 | **Retro Shaders Pro for Godot** (Daniel Ilett) | **최소 $15.99** | PS1 아핀·정점 스냅, N64 필터, CRT/VHS 후처리, 픽셀화, 텍셀 정렬 조명 | **모든 렌더러, 단 텍셀 정렬 조명은 Compatibility에서 제대로 안 됨.** Godot 4.5+만 보증 | ○ ([itch](https://danielilett.itch.io/retro-shaders-pro-for-godot)) |
 | 10 | **HorrorScreenFX** (asago) | 표시 가격 상충: 검색 결과는 $7.99(세일 $5.99), 검토 의견은 $4.99(세일 $1.99). **직접 확인 필요** | 공포 풀스크린 효과 프리셋, 런타임 제어, GDScript API | **Godot 4.7 필요**(판매 페이지 요구 사항, 검토 의견 인용·직접 확인 ✕). 이전 4.x에서는 보증되지 않음 | △ ([itch](https://asago.itch.io/horrorscreenfx)) |
 | 11 | **Retro Screen FX** (inkharbor) | 검색 결과는 번들 할인 적용 $4.96, 검토 의견은 정가 $8(세일 $6). **번들 할인가를 단품 가격으로 쓰면 안 됨, 직접 확인 필요** | 후처리 셰이더 9종, 프리셋 37개, 드롭인 레이어 노드 | Godot 4.7 | △ |
-| 12 | **Retro Screen FX** (heyheythere) | 검색 결과는 번들·론칭 세일가 $2.99, 검토 의견은 현재 $3.49. **직접 확인 필요** | CRT·VHS·게임보이 프리셋 12종, 2D·3D | Godot 4 | △ |
+| 12 | **Retro Screen FX** (heyheythere) | 처음 적은 $2.99는 번들·론칭 세일가였고 오래된 값이다. 검토 의견은 상품 페이지(10월 11일 갱신)가 **최소 $4.99**라고 함. **직접 확인 필요** | CRT·VHS·게임보이 등 레트로 화면 효과 프리셋. 처음 적은 "12종"은 오래된 값이고, 검토 의견은 **24종**이라고 함. 2D·3D | 검토 의견: **Godot 4.3~4.7, 모든 렌더러**. 처음 적은 "Godot 4"는 부정확했음 | △ ([itch](https://heyheythere.itch.io/retro-screen-fx), 직접 확인 ✕) |
 | 13 | Pixel Dither / Color Dither | 무료, CC0 | 팔레트 디더링 | Godot 4 | △ |
 | 14 | Godot 4 Shader Pack (munchkin-jonesy), Retro Horror FX Toolkit (rastalr) | 계획서 초안은 각각 $4.99 | 초안은 "셰이더 13개 + 데모", "화면 효과 4종·프리셋 12종" | - | **이번 조사에서 찾지 못함 ✕** (GPT 초안의 인용) |
 
