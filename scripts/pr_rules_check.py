@@ -83,6 +83,21 @@ def code_list(items, max_items=20):
     return shown
 
 
+FILE_LIST_CAP = 3000  # GitHub의 PR 파일 목록 API는 3000개까지만 돌려준다
+
+
+def is_truncated(count):
+    return count >= FILE_LIST_CAP
+
+
+def effective_issue_number(body, branch, auto_generated):
+    """Closes #N이 있으면 그 번호. Jules 같은 자동 생성 본문에 한해 브랜치의 이슈 번호로 대신한다."""
+    n = find_closes(body)
+    if n is None and auto_generated:
+        n = branch_issue_number(branch)
+    return n
+
+
 MAX_COMMENT = 60000  # GitHub 댓글 한도(65,536자)보다 낮게
 
 
@@ -158,9 +173,13 @@ def run_checks(pr):
     results = [check_branch(pr["branch"], pr["prefixes"])]
     number = find_closes(pr["body"])
     bn = branch_issue_number(pr["branch"])
+    fallback = number is None and pr.get("auto_generated") and bn is not None and pr["issue"] is not None
     if results[0]["level"] == "ok" and bn is not None and number is not None and bn != number:
         results[0] = _res("branch", "fail", f"브랜치의 이슈 번호 #{bn}와 본문의 `Closes #{number}`가 다르다.")
-    results.append(check_closes(number, pr["issue"], pr.get("auto_generated", False)))
+    if fallback:
+        results.append(_res("closes", "review", f"자동 생성 본문이라 `Closes #N`이 없다. 브랜치의 Issue #{bn}을 기준으로 검사했다. 연결이 맞는지 사람이 확인해야 한다."))
+    else:
+        results.append(check_closes(number, pr["issue"], pr.get("auto_generated", False)))
     if not is_trusted_issue(pr["issue"]):
         results.append(_res("scope", "skip", "신뢰할 수 있는 연결 Issue가 없어 건너뛰었다."))
         results.append(_res("protected", "skip", "신뢰할 수 있는 연결 Issue가 없어 건너뛰었다."))
@@ -168,6 +187,11 @@ def run_checks(pr):
         declared = parse_issue_paths(pr["issue"].get("body", ""))
         results.append(check_scope(pr["files"], declared))
         results.append(check_protected(pr["files"], declared))
+    if pr.get("files_truncated"):
+        msg = f"변경 파일이 {FILE_LIST_CAP}개 이상이라 목록이 잘렸을 수 있다. 이 검사는 완전하지 않으니 사람이 확인해야 한다."
+        for i, r in enumerate(results):
+            if r["id"] in ("scope", "protected"):
+                results[i] = _res(r["id"], "review", msg)
     return results
 
 
@@ -232,9 +256,11 @@ def main():
     number = int(os.environ["PR_NUMBER"])
     api = f"https://api.github.com/repos/{repo}"
     pr = _api("GET", f"{api}/pulls/{number}", token)
-    files = collect_files(_paged(f"{api}/pulls/{number}/files", token))
+    api_files = _paged(f"{api}/pulls/{number}/files", token)
+    files = collect_files(api_files)
     body = pr.get("body") or ""
-    closes = find_closes(body)
+    auto = "created automatically by Jules" in body
+    closes = effective_issue_number(body, pr["head"]["ref"], auto)
     issue = None
     if closes is not None:
         try:
@@ -249,7 +275,8 @@ def main():
         "files": files,
         "issue": issue,
         "prefixes": load_prefixes(),
-        "auto_generated": "created automatically by Jules" in body,
+        "auto_generated": auto,
+        "files_truncated": is_truncated(len(api_files)),
     }
     text = render_comment(run_checks(info))
     comments = _paged(f"{api}/issues/{number}/comments", token)

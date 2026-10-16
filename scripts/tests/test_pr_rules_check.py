@@ -138,6 +138,62 @@ class SizeBounds(unittest.TestCase):
         self.assertTrue(text.startswith(m.MARKER))
 
 
+class TruncatedListing(unittest.TestCase):
+    def pr(self, **kw):
+        base = dict(
+            branch="claude/11-x", body="Closes #11", files=["scripts/check-scaffold.sh"],
+            issue={"body": ISSUE_BODY, "author_association": "OWNER"},
+            prefixes=PREFIXES, auto_generated=False,
+        )
+        base.update(kw)
+        return base
+
+    def test_cap_constant_matches_github_limit(self):
+        self.assertEqual(m.FILE_LIST_CAP, 3000)
+
+    def test_truncated_listing_never_reports_green(self):
+        by = {r["id"]: r for r in m.run_checks(self.pr(files_truncated=True))}
+        self.assertEqual(by["scope"]["level"], "review")
+        self.assertEqual(by["protected"]["level"], "review")
+        self.assertIn("3000", by["scope"]["message"])
+
+    def test_not_truncated_is_unchanged(self):
+        by = {r["id"]: r for r in m.run_checks(self.pr(files_truncated=False))}
+        self.assertEqual(by["scope"]["level"], "ok")
+
+    def test_is_truncated_helper(self):
+        self.assertTrue(m.is_truncated(3000))
+        self.assertTrue(m.is_truncated(3001))
+        self.assertFalse(m.is_truncated(2999))
+
+
+class JulesFallback(unittest.TestCase):
+    def test_effective_issue_number_uses_closes_first(self):
+        self.assertEqual(m.effective_issue_number("Closes #5", "gemini/9-x", True), 5)
+
+    def test_auto_generated_body_falls_back_to_branch(self):
+        self.assertEqual(m.effective_issue_number("PR created automatically by Jules", "gemini/9-x", True), 9)
+
+    def test_no_fallback_when_not_auto_generated(self):
+        self.assertIsNone(m.effective_issue_number("no link", "gemini/9-x", False))
+
+    def test_session_branch_has_no_fallback(self):
+        self.assertIsNone(m.effective_issue_number("auto", "ccr-abc", True))
+
+    def test_auto_pr_is_checked_against_branch_issue(self):
+        pr = dict(
+            branch="gemini/2-hello", body="PR created automatically by Jules", files=["projects/_smoke/hello-jules.md"],
+            issue={"body": "### 수정 가능 경로 (한 줄에 경로 하나)\n\nprojects/_smoke/\n", "author_association": "OWNER"},
+            prefixes=PREFIXES, auto_generated=True,
+        )
+        by = {r["id"]: r for r in m.run_checks(pr)}
+        self.assertEqual(by["closes"]["level"], "review")
+        self.assertIn("2", by["closes"]["message"])
+        self.assertEqual(by["scope"]["level"], "ok")
+        pr["files"] = ["README.md"]
+        self.assertEqual({r["id"]: r for r in m.run_checks(pr)}["scope"]["level"], "fail")
+
+
 class ParsePrefixes(unittest.TestCase):
     def test_reads_prefix_from_agent_definition(self):
         text = "# X\n## 브랜치 접두어\n`codex/` → `codex/<이슈번호>-슬러그`\n## 기동 방법\n"
