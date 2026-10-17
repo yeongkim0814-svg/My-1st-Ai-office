@@ -41,7 +41,7 @@ GitHub 별 수·마지막 커밋 같은 값은 `github.com`이 막혀 있어 Web
 | 4 | **Modular Inventory** (alvlp) | 무료, MIT (Codeberg 저장소) | 드래그앤드롭, 핫바, 아이템 로직 스크립팅, 우클릭 1개 집기, 스크롤로 수량 조절, Shift-클릭 빠른 이동 | 신호 ✕ | 2.0.0 (2026-06-30) | [Asset Library](https://godotengine.org/asset-library/asset/5186) | ◎ |
 | 5 | **Grid Inventory Lite / Grid Inventory** (Godot_Forge) | Lite 무료(MIT), **PRO $6.99** | Lite: 슬롯 격자 드래그 이동·교환. PRO: 스택, 개수 표시, 병합, 툴팁, 저장 연동, Godot 4.3~4.6, 약 250줄, 상업 라이선스 포함. **회전·다칸 아이템 언급 없음** (슬롯 격자) | 평점·판매 ✕ | Lite 1.0.0 (2026-06-21) | [itch PRO](https://godot-forge.itch.io/grid-inventory-godot), [Asset Library Lite](https://godotengine.org/asset-library/asset/5285) | ◎ |
 | 6 | **Inventory Kit** (heyheythere) | **최소 $7.99** (Godot 4 번들 $14.99 프로모션, 2D 번들 58종 $39.99 표기) | 격자, **90° 회전**, 상자·장비 인형 이동, 저장·불러오기(평문 데이터), Godot 4.3~4.7, 재배포 금지 | 평점·다운로드 표시 없음 | 조사 시 "4일 전 갱신, 11일 전 게시" | [itch](https://heyheythere.itch.io/inventory-kit) | ○ |
-| 7 | **Inventory Kit Free** (heyheythere, 샘플) | 무료 표기로 보임 (목록에서 가격 파싱 안 됨) | "끌기·쌓기·합치기 격자 인벤토리 샘플". 6번 페이지는 무료판을 언급하지 않음 | ✕ | ✕ | [itch](https://heyheythere.itch.io/inventory-kit-free) | △ (검색 목록 제목만) |
+| 7 | **Inventory Kit Free** (heyheythere) | 무료, **CC BY 4.0** (Codex 리뷰가 페이지 내용으로 인용, 직접 확인 ✕) | 단순 샘플이 아니라 상당히 완성된 무료 구현: 다칸 아이템 **회전**, 분할·사용 동작, 상자 간 이동, 정렬, 저장·불러오기, UI, 실행 가능한 데모(리뷰 인용). 6번 페이지는 무료판을 언급하지 않음 | ✕ | ✕ | [itch](https://heyheythere.itch.io/inventory-kit-free) | △ (처음엔 검색 목록 제목만 봄. 상세 기능은 리뷰어 인용이라 **직접 확인 ✕**) |
 | 8 | **Diablo/RE4 스타일 인벤토리** (Martin Senges) — 제품명에 타사 게임 이름이 들어 있음 | **최소 $10** | 90° 회전, 아이템별 가로·세로 칸 크기, 호버 애니메이션. 마우스만 지원(게임패드·키보드 질문에 "마우스만" 답변). 저장·무게·멀티플레이 언급 없음. 재배포 금지 | 평점·다운로드 없음, 댓글 2개 | 출시 2024-04-13, 버그픽스 2024-09-21 | [itch](https://martin-senges.itch.io/diablo-resident-evil-4-style-inventory-system-godot-4) | ○ |
 | 9 | **Inventory System for Godot 4** (inkharbor) | **최소 $8** (론칭 세일, 13종 번들 $54.56) | 격자 UI, 드래그앤드롭, 스택, 인벤토리 간 이동, 상자, JSON 저장(`to_dict`/`from_dict`), Godot 4.3+. **회전·무게·멀티플레이는 "포함 안 함"** | 평점 없음 | 조사 시 "1일 전 갱신, 7일 전 게시" | [itch](https://inkharbor.itch.io/inventory-kit) | ○ |
 | 10 | **Inventory System – No-Code RPG Items** (selodev) | **$4.99**, 무료 Lite 있음 | 스택, 무게, 핫바, 툴팁, 컨테이너 종류별 데이터 계층, 에디터 독 | 평점 5.0 (1개) | 2026-10-13 | [itch](https://selodev.itch.io/godot-inventory-system) | ◎ |
@@ -68,6 +68,8 @@ GLoot(MIT, 별 985)이 **격자 + 90° 회전 + 무게 제약 + 직렬화 + 기�
 ### 유료 Godot 제품이 얹는 것 (페이지 문구 기준)
 
 완성된 UI 위젯과 데모, 상업 라이선스 명시, 에디터 편의(독·프리셋), 장비 인형·상자 같은 **즉시 쓸 수 있는 패키지**(5, 6, 9, 10번). 회전을 내세우는 유료 Godot 제품은 6번과 8번 둘이며, 그중 8번은 마우스 전용이다.
+
+**재평가 (PR #27 리뷰 반영)**: 7번 무료 키트가 UI, 데모, 회전, 분할, 상자 이동, 정렬, 저장까지 이미 갖춘 것으로 보고되었다(직접 확인 ✕). 그렇다면 "UI·데모가 있다"와 "즉시 쓸 수 있다"는 유료 제품의 **차별점이 아니라 무료 쪽도 이미 하는 것**이다. 이 조사에서 유료로 파는 이유로 볼 만한 것은 상업 라이선스 명시, 갱신·지원, 번들 정도로 줄어든다(모두 가설). 무료 경쟁이 더 강하므로 3절 "신호가 약하다"와 5절 결론(보류)의 근거를 약화시키는 방향이 아니라 **강화하는** 방향의 정정이다. 이 정정으로 "UI 겉모습이 유료의 핵심"이라는 이전 추정(응답에서 제가 말한 것)도 약해진다.
 
 ### Unity에는 있고 Godot 쪽에서는 찾지 못한 기능
 
