@@ -20,10 +20,10 @@
 | itch.io에는 Godot 태그로 거른 인기 에셋·도구 목록이 있다 | 예: Godot+UI 태그 인기 목록 78건, Godot+오픈소스 태그 인기 목록 4건(음악 팩, 플랫포머 기반 킷 등). 목록 제목·가격·판매량은 이번에 보지 못했다 | △ ([UI 인기순](https://itch.io/game-assets/top-sellers/tag-godot/tag-user-interface?page=3), [오픈소스 인기순](https://itch.io/game-assets/top-sellers/tag-godot/tag-open-source)) |
 | 가격대가 종류별로 크게 다르다 | 큐레이션 목록에 "Godot Nature Assets & Terrain Tools Collection $24.99", "Meadows - Stylized Environment $44.99"가 있다. 인기 순위가 아니라 사용자가 만든 목록이다 | △ ([목록](https://itch.io/c/8015341/assests)) |
 | 상위 평점 도구 예시 | "Godot 도구" 평점순 목록의 최고 평점은 Godot 4 컬러 디더 데모(4.9점, 평점 14개)였다. 평점 수가 적다 | △ ([목록](https://itch.io/tools/top-rated/tag-gamedev/tag-godot)) |
-| 에디터 플러그인 수요의 공개 신호는 공식 제안 목록에 있다 | 패키지·의존성 관리 시스템 부재(제안 #8451), 내장 코드 포매터 요청 등. Godot 제안 뷰어는 좋아요 순으로 정렬해 준다 | △ ([Godot 포럼](https://forum.godotengine.org/t/is-there-a-builtin-formatter-or-beautifier-in-godot-4/51498), [플러그인 글](https://godotengine.org/article/plugins/)) |
+| 에디터 플러그인 수요의 공개 신호는 공식 제안 목록에 있다 | 내장 코드 포매터 요청 등. 제안 #8451은 에디터 안에서 설치한 플러그인을 갱신하는 기능을 제안한 것으로, 패키지·의존성 관리 수요의 근거로 쓰지 않는다(Codex 리뷰 정정, 원문 직접 확인 ✕). Godot 제안 뷰어는 좋아요 순으로 정렬해 준다 | △ ([Godot 포럼](https://forum.godotengine.org/t/is-there-a-builtin-formatter-or-beautifier-in-godot-4/51498), [플러그인 글](https://godotengine.org/article/plugins/)) |
 | 한 판매자의 소득 추정 | 한 픽셀아트 제작자가 **품질 좋은 에셋 한 개가 해마다 대략 30~50유로** 번다고 추정했다. 의뢰 작업이 훨씬 수익이 좋았다고 했다. 오래된 댓글이며 한 사람의 의견이다 | △ ([itch 포럼](https://itch.io/post/12750888)) |
-| 한 Godot 4 캐릭터 팩 제작자의 경험 | 리브랜딩 전에는 아무도 구매하지 않았다고 했고, 무료 Lite 버전을 추가해 구매자가 평가하게 했다 | △ (같은 검색 결과) |
-| 장기 전업 사례도 있다 | 한 제작자는 4년째 에셋 판매로 생활한다고 했다. 한 사람의 사례이며 일반적이지 않다 | △ |
+| 한 Godot 4 캐릭터 팩 제작자의 경험 | 리브랜딩 전에는 아무도 구매하지 않았다고 했고, 무료 Lite 버전을 추가해 구매자가 평가하게 했다 | ✕ **미확인**: 검색 요약의 기억이며 URL을 보존하지 못했다. 근거로 쓰지 않는다 |
+| 장기 전업 사례도 있다 | 한 제작자는 4년째 에셋 판매로 생활한다고 했다. 한 사람의 사례이며 일반적이지 않다 | ✕ **미확인**: 출처 URL을 보존하지 못했다. 근거로 쓰지 않는다 |
 | 판매 수수료 | itch.io 기본 10% + 결제 수수료 약 2.9%+$0.30(경쟁사 마케팅 페이지 인용이라 틀이 편향될 수 있음) | △ |
 | 가격 책정 팁 | $5 정각으로 두면 $0~5와 $5~15 검색에 모두 노출된다는 한 제작자의 조언 | △ |
 
