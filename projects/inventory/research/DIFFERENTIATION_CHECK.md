@@ -148,11 +148,31 @@ GLoot이 **실제로 하는 것**(참고): 격자 제약과 90° 회전, 무게�
 
 - **Asset Library 건수**: 내가 API(`filter=inventory`, `godot_version=any`)로 받은 값은 22건(전부 MIT)이었다. 리뷰어는 공식 웹 목록이 30건이고 내 목록에 없는 [Inventory Demo with bags and chests](https://godotengine.org/asset-library/asset/940)(Godot 3.4, MIT, "storage"·"bags"를 쓰는 Terraria풍 데모)가 있다고 지적했다. 내가 이 항목을 `asset/940` API로 직접 받아 존재와 설명문을 확인했다(◎). API 목록에는 나타나지 않았으므로 **건수는 재현되지 않는 값이며 시장 신호로 쓰지 않는다.** 이 항목은 Godot 3.4용 오래된 데모라 H1~H4 판정에는 쓰지 않았지만 "bags and chests"의 구현은 읽지 않았다 ✕.
 
+### 4-4. Nested Inventories (CookieCherith0969, GDScript) — PR #27 리뷰(P1)로 추가, 직접 확인
+
+Asset Library `godot_version=4.3` 필터 검색에서 빠져 있던 무료 애드온이다(Godot 4.5 전용이라 4.3 필터에 걸리지 않음).
+
+| 항목 | 값 | 확인 |
+|---|---|---|
+| 출처 | [Asset Library 4628](https://godotengine.org/asset-library/asset/4628), 저장소 `CookieCherith0969/NestedInventories`, 커밋 `62ee2d0`(2026-01-02) | ◎ API, 클론 |
+| 라이선스·버전 | **MIT**, Godot 4.5, 버전 1.0.1 | ◎ API |
+| 언어·규모 | GDScript, `.gd` 6개, `.cs` 0개 | ◎ 클론 |
+| 설명문(원문) | "A slot-based inventory system that supports **nesting containers inside other containers**, stacking items, **rotating items**, and **arbitrary item and inventory shapes**." | ◎ API |
+
+| 가설 | 판정 | 근거 |
+|---|---|---|
+| H1 컨테이너 안 컨테이너 | **있음** (설명문 기준, 코드 줄 단위 검증 ✕) | 위 설명문 |
+| H2 수색·공개 | **없음** | `reveal|hidden|search|discover|unidentified` 검색에서 의미 있는 히트 없음(`rotation` 주석 한 줄뿐) ◎ |
+| H3 명령→권한자·롤백 | **없음** | `command|authority|rollback|revision|undo` 히트 없음 ◎ |
+| H4 스태시 잠금 / 저장 마이그레이션 | **없음** | `version|migrat|lock` 히트 없음 ◎ |
+
+**의미**: 이전 판단 "GDScript 쪽 무료 제품에는 H1(컨테이너 내부 그리드)이 없다"는 **틀렸다.** 작은(6파일) 애드온이지만 GDScript로 중첩과 불규칙 모양, 회전을 무료로 제공한다. 이 문서의 이전 문장 "GDScript 쪽에서는 못 찾음"을 이 절이 대체한다.
+
 ## 5. H1~H4 종합표
 
 | 가설 | GLoot | Inventory Kit Free | 그 외 무료 저장소(읽은 11곳) | 유료(5, 9, 10번) | 종합 |
 |---|---|---|---|---|---|
-| H1 컨테이너 아이템 내부 그리드 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 10곳 / 미확인 1곳(expressobits) / **있음 1곳: CTIS(4-2절)** | 미확인 | **무료로 존재한다(CTIS, C#/.NET 전용)**. GDScript 쪽에서는 못 찾음 |
+| H1 컨테이너 아이템 내부 그리드 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 10곳 / 미확인 1곳(expressobits) / **있음 1곳: CTIS(4-2절)** | 미확인 | **무료로 존재한다**: CTIS(C#/.NET 전용)와 **Nested Inventories(GDScript, MIT, 4-4절)** |
 | H2 수색·공개·중단 손실 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 11곳, CTIS도 없음 ◎ | 미확인 | **읽은 모든 무료 제품에 없다.** 유일하게 일관된 빈자리. 단 유료 Kit·유료 5, 9, 10번 소스 미확인 |
 | H3 명령→권한자·롤백·서버 권한 설계 | 부분 ◎ (swap 한 곳) | 부분 ◎ (조합·정렬 롤백, 규칙·화면 분리) | 없음 10곳 / 부분 1곳(expressobits 서버 권한 데모 ◎) / **있음 1곳: CTIS(불변 명령, 멱등, 리비전 검사, 트랜잭션 롤백)** | 미확인 | **무료로 존재한다(CTIS, C#/.NET 전용)**. GDScript 쪽은 부분 구현뿐 |
 | H4 스태시 잠금 / 저장 버전 마이그레이션 | 없음 ◎ | 없음 ◎ (버전 키 없음, 맞지 않는 항목은 조용히 버림) | 없음 (Menkos 다른 종류) / **CTIS: 마이그레이션 주장 ○, 코드 미확인** | 9번 마이그레이션 **부분** | 마이그레이션은 CTIS·유료 9번이 내세움. 스태시 잠금은 못 찾음 |
@@ -166,7 +186,7 @@ Issue #29의 진행 조건("H2를 포함해 두 개 이상이 무료 제품에 �
 근거
 
 1. **H2는 어디에도 없다.** GLoot, Inventory Kit Free, 읽은 무료 저장소 11곳, CTIS 모두에서 찾지 못했다(소스 ◎). 일관된 빈자리는 이것 하나다.
-2. **H1, H3는 CTIS가 무료로 이미 갖췄다**(C#/.NET 전용, 4-2절). GDScript 쪽 무료 제품(GLoot, Inventory Kit Free, Wyvernbox 등)에는 H1이 없고 H3는 부분(GLoot swap 복구, Inventory Kit Free 조합·정렬 롤백, expressobits 서버 권한 데모)뿐이다.
+2. **H1은 무료로 이미 있다**: CTIS(C#/.NET 전용, 4-2절)와 Nested Inventories(GDScript, MIT, 4-4절). **H3는 CTIS(C#)가 갖췄고** GDScript 쪽은 부분(GLoot swap 복구, Inventory Kit Free 조합·정렬 롤백, expressobits 서버 권한 데모)뿐이다.
 3. 저장 버전 마이그레이션(H4의 절반)은 CTIS와 유료 9번이 내세운다.
 4. 이 확인은 기능 중복이며 수요 증거가 아니다. `MARKET_SCAN.md`의 "유료 수요 증거 없음"은 그대로다.
 
@@ -174,10 +194,10 @@ Issue #29의 진행 조건("H2를 포함해 두 개 이상이 무료 제품에 �
 
 "익스트랙션 장르 구조 전체가 비어 있다"는 틀렸다. 남는 가설은 이렇다.
 
-> **GDScript만으로 쓸 수 있고(.NET 불필요) 웹·모바일로 내보낼 수 있는 인벤토리에, 수색·공개(H2)와 명령 기반 롤백(H3)을 함께 갖춘 것은 없다.**
+> **GDScript만으로 쓸 수 있고(.NET 불필요) 웹·모바일로 내보낼 수 있는 인벤토리에, 수색·공개(H2)와 명령 기반 롤백·권한자 구조(H3)를 함께 갖춘 것은 없다.** (컨테이너 중첩 H1은 Nested Inventories가 무료로 이미 제공하므로 차별점에서 제외한다.)
 
 이 가설이 의미 있으려면 **세 가지가 확인돼야 한다.** 모두 아직 확인되지 않았다.
-- 웹 내보내기 문제: Godot 4.7의 C# 프로젝트가 웹으로 내보내지는지(안 된다면 CTIS는 웹 대상에서 제외되므로 이 가설이 강해진다).
+- 웹 내보내기 문제: Godot 4.7의 C# 프로젝트가 웹으로 내보내지는지. **리뷰어가 공식 4.7 문서(`list_of_features`)를 인용해 "Godot 4로 작성한 C# 프로젝트는 웹으로 내보낼 수 없다"고 지적했다.** 이 세션은 `docs.godotengine.org`가 429로 응답해 원문을 직접 읽지 못했다(✕). 맞다면 CTIS는 웹 대상에서 이미 제외되고 이 가설의 "웹으로 내보낼 수 있는"이 의미를 갖는다.
 - GDScript 사용자 비중과 그중 이 구조를 원하는 사람이 있는지(수요).
 - CTIS가 이미 GDScript 사용자에게 충분한 대안인지(예: 사용자가 .NET 설치를 꺼리는지).
 
@@ -190,7 +210,7 @@ Issue #29의 진행 조건("H2를 포함해 두 개 이상이 무료 제품에 �
 
 ### 남은 확인 항목
 
-1. Godot 4.7 C# 웹 내보내기 상태(공식 문서 확인, 네트워크 필요).
+1. Godot 4.7 C# 웹 내보내기 상태: 리뷰어 인용(공식 문서)으로는 "불가"이고, 우리 쪽 직접 확인은 429로 실패했다. 문서 원문을 확인하면 이 항목은 닫힌다.
 2. CTIS의 H4(마이그레이션) 코드와 중첩 구현, 테스트 존재 여부를 실제 소스로 읽기.
 3. GitHub 검색 세 개 중 어느 것이 0건이었는지 사용자 확인(사용자 보고: "Your search did not match any repositories", 어느 검색인지 불명).
 
