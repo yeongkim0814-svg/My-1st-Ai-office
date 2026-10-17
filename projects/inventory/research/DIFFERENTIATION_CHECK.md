@@ -30,7 +30,7 @@
 | `git clone --depth 1` (GIT_LFS_SKIP_SMUDGE=1) | **성공.** `github.com`의 공개 저장소는 이 방식으로 읽혔다. 아래 소스 판정은 모두 이 클론을 직접 읽은 것이다 |
 | `github.com` 웹(WebFetch) | 열리지만 토픽·검색 화면이 **0건**을 돌려줬다. 로그인 없이 보이는 검색이 불완전할 수 있어 신뢰하지 않는다(4절) |
 | itch.io 상품 페이지 | 연속 요청에서 429가 났다. 간격을 두고 다시 받아 **Inventory Kit, Inventory Kit Free, 5, 9, 10번 페이지 HTML은 모두 받았다** |
-| itch.io 무료 파일 다운로드 | 다운로드 URL 단계까지 진행했으나 실제 파일 단계에서 `{"errors":["invalid key"]}`로 막혀 **Inventory Kit Free의 소스는 받지 못했다.** 더 시도하지 않았다 |
+| itch.io 무료 파일 다운로드 | 이 세션에서는 `invalid key`로 막혀 받지 못했다. **사용자가 직접 내려받아 비공개 레포 `game-asset`에 올린 `inventory-kit-free-assets.zip`(245,853바이트)을 이 세션에서 풀어 소스를 읽었다.** zip 안에 Godot 프로젝트·애드온(`addons/inventory_kit/`, GDScript 7파일 1,215줄, 데모 포함), Unity 패키지 부분, PNG 22개, `LICENSE.txt`가 있었다 |
 | Godot Asset Library API | 열림 |
 
 클론한 커밋: GLoot `6b09b87` (master, 2026-07-14), GBIS `901410f`, expressobits `f716e2c`, Wyvernbox `f83080d`.
@@ -58,7 +58,7 @@ GLoot이 **실제로 하는 것**(참고): 격자 제약과 90° 회전, 무게�
 
 ## 2. Inventory Kit Free / Inventory Kit (heyheythere, itch.io)
 
-설명문 전체를 HTML에서 읽었다(◎). **소스 코드는 받지 못했다.** 그래서 H 판정은 모두 **설명문 기준**이다.
+설명문 전체를 HTML에서 읽었고(◎), **무료판(Inventory Kit Free)은 사용자가 올린 zip의 GDScript 소스 7파일 1,215줄을 직접 읽었다(◎).** 유료판(Inventory Kit)의 소스는 받지 못했으므로 유료판의 H 판정은 설명문 기준이다.
 
 | 항목 | Inventory Kit Free | Inventory Kit (유료) | 확인 |
 |---|---|---|---|
@@ -76,12 +76,12 @@ GLoot이 **실제로 하는 것**(참고): 격자 제약과 90° 회전, 무게�
 
 | 가설 | 판정 | 근거 |
 |---|---|---|
-| H1 | **미확인** (설명문에 언급 없음) | "상자(chest)"와 "배낭"이 데모에 있으나, 한 **아이템**이 내부 그리드를 가진다는 문구가 없다. 소스를 못 읽음 |
-| H2 | **미확인** (설명문에 언급 없음) | 상자 데모에 "take all"이 있을 뿐 공개·수색·중단 문구가 없다 |
-| H3 | **미확인** (부분 단서) | 규칙(`InventoryGrid`)과 화면(`InventoryView`)을 분리하고 규칙을 시험한다고 적었다. 명령·권한자·서버 문구는 없다 |
-| H4 | **미확인** (부분 단서) | "save and load as plain data"가 있으나 버전·마이그레이션·스태시 잠금 문구가 없다 |
+| H1 | **없음** (무료판 소스 ◎) | 항목은 `{id, count, pos, turned}` 사전 하나이고(`inventory_grid.gd:5`) 아이템이 자기 그리드를 갖는 필드가 없다. 데모의 배낭과 상자는 **별도의 `InventoryView` 인스턴스**를 나란히 놓은 것이며 `send_to`로 Shift+클릭 이동한다(README, `demo.gd`). 유료판은 설명문 기준 **미확인** |
+| H2 | **없음** (무료판 소스 ◎) | `reveal`·`hidden`·`search` 검색에 소스 히트가 없다(`search`·`hidden`은 0건). 상자는 시작 내용물이 처음부터 모두 보이는 목록이다(`demo/demo.gd:10-23`의 시작 내용물 목록). 공개·중단 개념 없음. 유료판은 설명문에 언급 없음(미확인) |
+| H3 | **부분** (무료판 소스 ◎) | `InventoryGrid`가 `RefCounted`로 규칙만 담고 화면과 분리돼 있다(`inventory_grid.gd:1-5`). `drop()`의 조합 실패와 `sort()` 실패는 `entries`를 되돌린다(`inventory_grid.gd:176-183` 부근, `sort`). 그러나 **명령 객체·권한자·이벤트·서버 개념은 없고**(`command`·`authority`·`rpc` 히트 0건), `swap`은 원본을 먼저 지운 뒤 놓는 방식이라 모든 변경이 일관된 롤백을 갖지는 않는다. 설명문의 "tested" 테스트 파일은 zip에 없어 확인하지 못함(✕) |
+| H4 | **없음** (무료판 소스 ◎) | 저장은 `to_data()`/`from_data()`로 단순 배열을 주고받는다. **버전 키가 없고**, 불러올 때 카탈로그에 없거나 맞지 않는 항목은 **조용히 버린다**(보고 없음, `inventory_grid.gd` `from_data`). 스태시 잠금 개념 없음(`lock` 검색 히트는 `blockers()`라는 함수 이름뿐, 기능 아님) |
 
-**소스를 읽어야 확정된다.** 다운로드 파일 이름은 `inventory-kit-free-assets.zip`, `inventory-kit-free-1.0.1.unitypackage`다(◎ 페이지 파일 목록). Godot 애드온이 어느 파일 안에 있는지는 확인하지 못했다.
+무료판 판정은 소스 검색(`reveal|search|hidden|nested|sub_inventor|container|rpc|authority|command|rollback|version|migrat|lock`)과 `inventory_grid.gd`, `item_hand.gd`, `item_catalogue.gd` 읽기에 근거한다. 검색 히트는 `blockers()`(칸 충돌 판정)와 `HBoxContainer`/`PanelContainer`(UI 노드) 이름뿐이었다. 유료판은 설명문 기준 장비 인형(슬롯 9개)을 더하는데 그 부분 소스는 읽지 못했다. 라이선스: zip의 `LICENSE.txt`가 CC BY 4.0과 크레딧 문구를 명시한다(◎).
 
 ## 3. MARKET_SCAN 5, 6, 9, 10번 상품 (설명문 기준)
 
@@ -128,45 +128,41 @@ GLoot이 **실제로 하는 것**(참고): 격자 제약과 90° 회전, 무게�
 
 | 가설 | GLoot | Inventory Kit Free | 그 외 무료 저장소(읽은 11곳) | 유료(5, 9, 10번) | 종합 |
 |---|---|---|---|---|---|
-| H1 컨테이너 아이템 내부 그리드 | 없음 ◎ | 미확인 | 없음 10곳 / 미확인 1곳(expressobits) | 미확인 | **없다는 쪽**, 단 Kit Free·expressobits 미확인 |
-| H2 수색·공개·중단 손실 | 없음 ◎ | 미확인 | 없음 11곳 | 미확인 | **없다는 쪽**, 단 Kit Free 소스 미확인 |
-| H3 명령→권한자·롤백·서버 권한 설계 | 부분 ◎ (swap 한 곳) | 미확인(분리 단서) | 없음 10곳 / 부분 1곳(expressobits 주장만) | 미확인 | **구조로서는 없다**. 부분 구현만 있음 |
-| H4 스태시 잠금 / 저장 버전 마이그레이션 | 없음 ◎ | 미확인 | 없음 (Menkos 다른 종류) | 9번 마이그레이션 **부분** | **마이그레이션은 유료 1건이 내세움**, 스태시 잠금은 못 찾음 |
+| H1 컨테이너 아이템 내부 그리드 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 10곳 / 미확인 1곳(expressobits) | 미확인 | **없다**. 단 유료 Kit·expressobits 미확인 |
+| H2 수색·공개·중단 손실 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 11곳 | 미확인 | **없다**. 단 유료 Kit·유료 5, 9, 10번 소스 미확인 |
+| H3 명령→권한자·롤백·서버 권한 설계 | 부분 ◎ (swap 한 곳) | 부분 ◎ (조합·정렬 롤백, 규칙·화면 분리) | 없음 10곳 / 부분 1곳(expressobits 주장만) | 미확인 | **구조로서는 없다**. 부분 구현만 있음 |
+| H4 스태시 잠금 / 저장 버전 마이그레이션 | 없음 ◎ | 없음 ◎ (버전 키 없음, 맞지 않는 항목은 조용히 버림) | 없음 (Menkos 다른 종류) | 9번 마이그레이션 **부분** | **마이그레이션은 유료 1건이 내세움**, 스태시 잠금은 못 찾음 |
 
 ## 6. 결론
 
-**보류** (진행 쪽으로 기움).
+**진행** (기능 중복 판정에 한정). 수요 판정은 아니다.
 
 근거
 
-1. 가장 큰 무료 경쟁자인 **GLoot에는 H1, H2, H4가 없고 H3는 swap 한 곳의 복구뿐이다**(1절, 소스 ◎). 읽은 다른 무료 저장소 11곳에도 H2 구현은 없었다(4절 ◎).
-2. Issue의 "진행" 조건(H2 포함 두 개 이상이 무료 제품에 없다고 확인)은 **GLoot과 읽은 저장소 기준으로는 충족**된다(H1, H2, H3 구조, H4 스태시 잠금).
-3. 그러나 Issue의 "보류" 조건에 해당하는 미확인이 남는다. **Inventory Kit Free는 소스를 받지 못해** H1~H4 모두 설명문 기준 "미확인"이다. 이 제품은 무료이고 CC BY 4.0이며 Godot 4.3~4.7을 지원한다고 스스로 표기하고 있어 가장 가까운 무료 대안이다. 설명문에는 H1~H4 중 어떤 것도 언급되어 있지 않다(그래서 있을 가능성은 낮지만 **확정이 아니다**).
-4. H4 중 **저장 버전 마이그레이션**은 유료 9번(inkharbor, $8)이 내세운다. 가설 중 이 절반은 차별점으로 약하다.
-5. 이 확인은 기능 중복 여부이지 수요 증거가 아니다. `MARKET_SCAN.md`의 "유료 수요의 증거 없음"(결론 보류)은 그대로이고, 이 문서가 바꾼 것은 "GLoot이 이미 갖췄을 수 있다"는 `PROTOTYPE_AUDIT.md` 7절의 중단 조건 하나를 **기각**한 것이다.
+1. 가장 큰 무료 경쟁자 **GLoot에는 H1, H2, H4가 없고 H3는 swap 한 곳의 복구뿐이다**(1절, 소스 ◎).
+2. 가장 가까운 무료 대안 **Inventory Kit Free도 소스를 직접 읽은 결과 H1, H2, H4가 없고 H3는 부분(조합·정렬 롤백과 규칙·화면 분리)뿐이다**(2절, 소스 ◎).
+3. 읽은 다른 무료 저장소 11곳에도 H2 구현은 없었다(4절 ◎). 사용자가 로그인한 GitHub 검색에서도 "Your search did not match any repositories"가 나왔다고 보고했다(어느 검색인지는 확인하지 못함, 요약이 아니라 사용자 보고 ○).
+4. Issue #29의 "진행" 조건(H2를 포함해 두 개 이상이 무료 제품에 없다고 확인)을 **충족한다.** H1, H2, H3 구조, H4 스태시 잠금이 읽은 무료 제품에 없다.
+5. 약한 부분: H4 중 **저장 버전 마이그레이션**은 유료 9번(inkharbor, $8)이 내세운다. 이 절반은 차별점으로 약하다. 유료 Kit의 소스와 유료 5, 9, 10번 소스는 읽지 못했다.
+6. **이 결론은 "같은 기능을 가진 제품을 찾지 못했다"이다.** 구매자가 있다는 뜻이 아니다. 아무도 만들지 않은 이유가 빈자리가 아니라 수요가 없어서일 수 있다. `MARKET_SCAN.md`의 "유료 수요 증거 없음"은 그대로다.
 
 ### 반증 조건
 
 | 방향 | 조건 |
 |---|---|
-| 중단으로 | Inventory Kit Free(또는 Kit) 소스에 H2(수색·공개)와 H1(컨테이너 아이템 내부 그리드)이 이미 있다. 또는 4절의 GitHub 검색에서 H2를 구현한 공개 저장소가 나오고 사용 가능한 라이선스다. 또는 expressobits의 "RE4 격자"가 컨테이너 아이템 내부 그리드를 포함한다 |
-| 진행으로 | Inventory Kit Free 소스에서 H1~H4 중 H2를 포함해 두 개 이상이 없다고 확인되고, 4절 GitHub 검색에서도 H2 구현이 나오지 않는다. (수요 증거는 별개이며 이 조건만으로 "진행"은 기능 중복 판정에 한정된다) |
+| 중단으로 | 유료 Inventory Kit나 유료 5, 9, 10번 소스에 H2(수색·공개)와 H1(컨테이너 아이템 내부 그리드)이 이미 있다. 또는 H2를 구현한 공개 저장소가 나오고 사용 가능한 라이선스다(읽지 못한 저장소 4곳, GitHub 전체 검색 미완). 또는 expressobits의 "RE4 격자"가 컨테이너 아이템 내부 그리드를 포함한다 |
+| 수요 쪽으로 (다음 단계) | 최소 데모(상자 수색 + 조끼·가방 이동)를 처음 보는 사람 1명 이상에게 보여 주고, 설명 없이 이해하고 쓰는지 관찰하는 외부 반응. 이 문서의 기능 중복 판정과는 별개다 |
 
-### 사용자에게 요청 (보류를 풀기 위해)
+### 남은 사용자 확인 (보류를 완전히 푸는 데 필요하지는 않음)
 
-1. itch.io [Inventory Kit Free](https://heyheythere.itch.io/inventory-kit-free)에서 파일을 내려받아 압축을 풀고, **Godot 애드온 폴더(`addons/inventory_kit/`) 안에서** 아래 출력을 이 Issue에 붙여 넣어 주세요.
-   ```
-   grep -rniE "reveal|search|hidden|nested|sub_?inventor|container|rpc|authority|command|rollback|version|migrat|lock" addons/inventory_kit --include=*.gd | head -60
-   ```
-   그리고 `ls -R addons/inventory_kit | head -60` 출력도.
-2. 위 4절의 GitHub 검색 세 개를 로그인된 브라우저에서 열어 결과 저장소 이름(상위 10개)을 붙여 넣어 주세요.
+1. GitHub 검색 세 개 중 어느 것이 0건이었는지, 나머지는 어떤 결과였는지 알려 주세요(위 3번 보고가 세 검색 모두인지 불분명).
 
 ## 7. 확인하지 못한 항목
 
 | 항목 | 이유 |
 |---|---|
-| Inventory Kit Free / Kit의 소스 | itch.io 파일 다운로드가 `invalid key`로 막힘. 더 시도하지 않음 |
-| Inventory Kit Free의 코드 파일 라이선스 헤더 | 소스 미열람 (본문의 CC BY 4.0 표기만 확인) |
+| 유료 Inventory Kit의 소스 | 유료라 받지 못함. 무료판 소스는 사용자가 올린 zip으로 읽음 |
+| Inventory Kit Free 코드 파일 각각의 라이선스 헤더 | zip의 `LICENSE.txt`와 README의 CC BY 4.0 표기는 확인(◎). 각 `.gd` 파일 머리의 헤더는 없음 |
 | 5, 9, 10번 상품 소스 | 유료. 설명문만 읽음 |
 | GLoot GitHub Release 객체, 이슈·PR 목록 | 태그는 `ls-remote`로 확인했으나 Release 페이지·이슈는 보지 못함. 중첩·수색 기능 요청 이슈가 있는지 미확인 |
 | `thunderplugins/inventory-for-godot-4`, `mdos-san/godot-inventory-system`, `Abab-bk/FlowerIventory`, Codeberg `alvlp/modular-inventory` | 클론 실패 또는 시도하지 않음 |
