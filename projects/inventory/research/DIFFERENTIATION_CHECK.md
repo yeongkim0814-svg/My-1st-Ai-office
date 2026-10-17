@@ -104,7 +104,7 @@ GLoot이 **실제로 하는 것**(참고): 격자 제약과 90° 회전, 무게�
 | peter-kish/gloot | 2026-07-14 | 없음 | 없음 | 부분(swap 복구) | 없음 |
 | Cabbage0211/grid-base-inventory-system (GBIS) | 2025-08-21 | 없음 (`item_grids_map`은 아이템이 차지한 **칸 좌표** 목록이지 내부 그리드가 아님. 컨테이너는 이름으로 구분되는 별도 데이터) [container_data.gd:16-17](https://github.com/Cabbage0211/grid-base-inventory-system/blob/901410f/addons/grid_base_inventory_system/core/model/container/container_data.gd#L16-L17) | 없음 | 없음 | 없음 |
 | don-tnowe/godot-wyvernbox-inventory | 2026-01-27 | 없음 (`nested`는 중첩된 `ItemGenerator` 주석) | 없음 (`search`는 이름 검색 패턴·인스펙터 안내) | 없음 | 없음 (`save_state`·`load_state`·`to_dict`는 있으나 버전 키 못 찾음) |
-| expressobits/inventory-system (C++ GDExtension) | 2026-02-19 | 미확인 (README가 "Inventory with grids like RE4"를 완료로 표시. 컨테이너 아이템 여부는 소스 미열람) | 없음 | **부분(주장만)**: README가 "Multiplayer compatible (Including example)"라고 적음(L33). C++ `src`에서 rpc·authority 문자열은 찾지 못함 | 없음 |
+| expressobits/inventory-system (C++ GDExtension; **`main`과 `addon` 브랜치가 다름**) | 2026-02-19 (`addon` 브랜치 `5d9a6f4` 포함) | 미확인 (README가 "Inventory with grids like RE4"를 완료로 표시. 컨테이너 아이템 여부는 소스 미열람) | 없음 | **부분** (`addon` 브랜치 ◎): `addons/inventory-system-demos/mp/`의 멀티플레이 데모가 `@rpc`, `multiplayer.is_server()`, `set_multiplayer_authority(1)`과 `SyncInventory` 노드를 쓴다. 이는 **Godot 멀티플레이 권한 + 동기화 노드** 방식이다. 명령 객체·롤백은 찾지 못했다 | 없음 | 없음 |
 | seloc0des/godot-inventory-lite | 2026-10-13 | 없음 (`nested`는 에디터 독의 노드 탐색 주석) | 없음 | 없음 (`server`는 `TextServer`·`DisplayServer`) | 없음 (`migration`은 Lite→Pro **업그레이드 안내 문서**) |
 | Menkos/inventory-forge | 2026-01-31 | 없음 | 없음 (`search`는 에디터 검색창) | 없음 | 부분이라기보다 **다른 종류**: 아이템 DB 편집기의 `validate_and_migrate()`와 JSON `"version": "1.0"`. 런타임 저장 데이터 마이그레이션인지는 읽지 못함 |
 | Oen44/Godot-Inventory | 2026-07-15 | 없음 | 없음 | 없음 | 없음 |
@@ -124,38 +124,75 @@ GLoot이 **실제로 하는 것**(참고): 격자 제약과 90° 회전, 무게�
 - `https://github.com/search?q=godot+inventory+search+reveal&type=repositories`
 - `https://github.com/search?q=godot+inventory+extraction&type=repositories`
 
+### 4-2. CTIS (Cholopol Tetris Inventory System) — Codex 리뷰(P1)로 추가, 직접 확인
+
+처음 조사에서 빠뜨린 무료 프로젝트다. Asset Library가 아니라 GitHub에만 있어 4절의 방법(Asset Library 목록)으로는 잡히지 않았다. 클론해서 README와 소스를 읽었다(◎).
+
+| 항목 | 값 | 확인 |
+|---|---|---|
+| 저장소·라이선스 | `Cholopol/Cholopol-Tetris-Inventory-System`, **Apache-2.0**(`LICENSE` 파일), 마지막 커밋 2026-08-23 `15fe260` "v2.0.1", C# 파일 94개 | ◎ |
+| 요구 사항 | **Godot 4.7+ .NET(Mono)와 .NET 8 SDK가 필요**하고, 별도 저장소의 DotPudica Framework·TetrisCoordLib 애드온 두 개에 의존한다(README 41행, 648행) | ◎ |
+| 특징 | 임의 점집합(폴리오미노) 아이템, 4방향 회전, **"무한 중첩 컨테이너"**, 빠른 교환, 자동 정렬, 다중 슬롯 저장, 에디터 내장 데이터 편집기, 타르코프 풍 데모 UI | ◎ README |
+
+| 가설 | 판정 | 근거 |
+|---|---|---|
+| **H1** 컨테이너 아이템 내부 그리드 | **있음** | README "Nested Containers & Tree Caching — Flat GUID Foreign-Key Model", `InventoryTreeCache`, "infinite nested containers". 중첩 구현 코드 자체는 줄 단위로 읽지 않았다 ○ |
+| **H2** 수색·공개 | **없음** | `reveal|unidentified|searching|discover|hidden item` 검색에서 의미 있는 히트 없음(README의 "Discovery"는 오류 발견 시점 문맥) ◎ |
+| **H3** 명령→권한자·롤백 | **있음 (서버 구현은 아님)** | 모든 변경이 불변 `InventoryCommand`(`CommandId` 멱등성, `ExpectedRevision` 낙관적 동시성)를 거치고 실패 시 트랜잭션 롤백("zero dirty state")이며 재생·되돌리기를 지원한다고 적었다(README 250-284행, 471-499행). **실제 서버/네트워크 코드는 읽지 못함**, README는 멀티플레이 복제를 "natively supporting"으로 표현 ○ |
+| **H4** 스태시 잠금 / 저장 마이그레이션 | **부분** | 데모에 스태시 패널이 있다(`StashPanelVM`). README 목차에 "Save & Persistence — Wrapper Pattern and Version Migration"이 있으나 본문·코드는 읽지 않았다 ○. 스태시 잠금 개념은 코드 검색에서 못 찾음 |
+| 테스트 | **미확인** | README는 "Core layer decoupled from Godot ... full test suites in seconds"라고 주장하지만 저장소에서 테스트 프로젝트 파일을 찾지 못했다(`find -iname '*test*'`는 `ShapeHitTest.cs`뿐) ✕ |
+
+**의미**: H1, H3, H4(일부)는 **무료 오픈소스로 이미 존재한다.** 다만 **C#/.NET 8과 Godot 4.7 Mono 전용**이고 의존 프레임워크가 둘이다. GDScript만 쓰는 프로젝트에서는 쓸 수 없다. Godot 4.x의 C# 프로젝트는 웹 내보내기를 지원하지 않는다는 기록이 사용자 프로토타입 `docs/TECH.md`에 있으나(2차 자료), 4.7에서도 그런지는 **확인하지 못했다** ✕.
+
+### 4-3. 보정 사항 (Codex 리뷰)
+
+- **Asset Library 건수**: 내가 API(`filter=inventory`, `godot_version=any`)로 받은 값은 22건(전부 MIT)이었다. 리뷰어는 공식 웹 목록이 30건이고 내 목록에 없는 [Inventory Demo with bags and chests](https://godotengine.org/asset-library/asset/940)(Godot 3.4, MIT, "storage"·"bags"를 쓰는 Terraria풍 데모)가 있다고 지적했다. 내가 이 항목을 `asset/940` API로 직접 받아 존재와 설명문을 확인했다(◎). API 목록에는 나타나지 않았으므로 **건수는 재현되지 않는 값이며 시장 신호로 쓰지 않는다.** 이 항목은 Godot 3.4용 오래된 데모라 H1~H4 판정에는 쓰지 않았지만 "bags and chests"의 구현은 읽지 않았다 ✕.
+
 ## 5. H1~H4 종합표
 
 | 가설 | GLoot | Inventory Kit Free | 그 외 무료 저장소(읽은 11곳) | 유료(5, 9, 10번) | 종합 |
 |---|---|---|---|---|---|
-| H1 컨테이너 아이템 내부 그리드 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 10곳 / 미확인 1곳(expressobits) | 미확인 | **없다**. 단 유료 Kit·expressobits 미확인 |
-| H2 수색·공개·중단 손실 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 11곳 | 미확인 | **없다**. 단 유료 Kit·유료 5, 9, 10번 소스 미확인 |
-| H3 명령→권한자·롤백·서버 권한 설계 | 부분 ◎ (swap 한 곳) | 부분 ◎ (조합·정렬 롤백, 규칙·화면 분리) | 없음 10곳 / 부분 1곳(expressobits 주장만) | 미확인 | **구조로서는 없다**. 부분 구현만 있음 |
-| H4 스태시 잠금 / 저장 버전 마이그레이션 | 없음 ◎ | 없음 ◎ (버전 키 없음, 맞지 않는 항목은 조용히 버림) | 없음 (Menkos 다른 종류) | 9번 마이그레이션 **부분** | **마이그레이션은 유료 1건이 내세움**, 스태시 잠금은 못 찾음 |
+| H1 컨테이너 아이템 내부 그리드 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 10곳 / 미확인 1곳(expressobits) / **있음 1곳: CTIS(4-2절)** | 미확인 | **무료로 존재한다(CTIS, C#/.NET 전용)**. GDScript 쪽에서는 못 찾음 |
+| H2 수색·공개·중단 손실 | 없음 ◎ | 없음 ◎ (무료판 소스) | 없음 11곳, CTIS도 없음 ◎ | 미확인 | **읽은 모든 무료 제품에 없다.** 유일하게 일관된 빈자리. 단 유료 Kit·유료 5, 9, 10번 소스 미확인 |
+| H3 명령→권한자·롤백·서버 권한 설계 | 부분 ◎ (swap 한 곳) | 부분 ◎ (조합·정렬 롤백, 규칙·화면 분리) | 없음 10곳 / 부분 1곳(expressobits 서버 권한 데모 ◎) / **있음 1곳: CTIS(불변 명령, 멱등, 리비전 검사, 트랜잭션 롤백)** | 미확인 | **무료로 존재한다(CTIS, C#/.NET 전용)**. GDScript 쪽은 부분 구현뿐 |
+| H4 스태시 잠금 / 저장 버전 마이그레이션 | 없음 ◎ | 없음 ◎ (버전 키 없음, 맞지 않는 항목은 조용히 버림) | 없음 (Menkos 다른 종류) / **CTIS: 마이그레이션 주장 ○, 코드 미확인** | 9번 마이그레이션 **부분** | 마이그레이션은 CTIS·유료 9번이 내세움. 스태시 잠금은 못 찾음 |
 
 ## 6. 결론
 
-**진행** (기능 중복 판정에 한정). 수요 판정은 아니다.
+**보류.** 이전 판정("진행")을 철회한다. 철회 사유는 4-2절의 CTIS(무료 Apache-2.0)가 H1, H3, H4 일부를 이미 구현했다는 사실이다.
+
+Issue #29의 진행 조건("H2를 포함해 두 개 이상이 무료 제품에 없다")을 **다시 적용하면 충족하지 않는다.** 읽은 모든 무료 제품을 통틀어 일관되게 없는 것은 **H2(수색·공개) 하나**다.
 
 근거
 
-1. 가장 큰 무료 경쟁자 **GLoot에는 H1, H2, H4가 없고 H3는 swap 한 곳의 복구뿐이다**(1절, 소스 ◎).
-2. 가장 가까운 무료 대안 **Inventory Kit Free도 소스를 직접 읽은 결과 H1, H2, H4가 없고 H3는 부분(조합·정렬 롤백과 규칙·화면 분리)뿐이다**(2절, 소스 ◎).
-3. 읽은 다른 무료 저장소 11곳에도 H2 구현은 없었다(4절 ◎). 사용자가 로그인한 GitHub 검색에서도 "Your search did not match any repositories"가 나왔다고 보고했다(어느 검색인지는 확인하지 못함, 요약이 아니라 사용자 보고 ○).
-4. Issue #29의 "진행" 조건(H2를 포함해 두 개 이상이 무료 제품에 없다고 확인)을 **충족한다.** H1, H2, H3 구조, H4 스태시 잠금이 읽은 무료 제품에 없다.
-5. 약한 부분: H4 중 **저장 버전 마이그레이션**은 유료 9번(inkharbor, $8)이 내세운다. 이 절반은 차별점으로 약하다. 유료 Kit의 소스와 유료 5, 9, 10번 소스는 읽지 못했다.
-6. **이 결론은 "같은 기능을 가진 제품을 찾지 못했다"이다.** 구매자가 있다는 뜻이 아니다. 아무도 만들지 않은 이유가 빈자리가 아니라 수요가 없어서일 수 있다. `MARKET_SCAN.md`의 "유료 수요 증거 없음"은 그대로다.
+1. **H2는 어디에도 없다.** GLoot, Inventory Kit Free, 읽은 무료 저장소 11곳, CTIS 모두에서 찾지 못했다(소스 ◎). 일관된 빈자리는 이것 하나다.
+2. **H1, H3는 CTIS가 무료로 이미 갖췄다**(C#/.NET 전용, 4-2절). GDScript 쪽 무료 제품(GLoot, Inventory Kit Free, Wyvernbox 등)에는 H1이 없고 H3는 부분(GLoot swap 복구, Inventory Kit Free 조합·정렬 롤백, expressobits 서버 권한 데모)뿐이다.
+3. 저장 버전 마이그레이션(H4의 절반)은 CTIS와 유료 9번이 내세운다.
+4. 이 확인은 기능 중복이며 수요 증거가 아니다. `MARKET_SCAN.md`의 "유료 수요 증거 없음"은 그대로다.
+
+### 좁혀진 가설 (이후 판단의 기준)
+
+"익스트랙션 장르 구조 전체가 비어 있다"는 틀렸다. 남는 가설은 이렇다.
+
+> **GDScript만으로 쓸 수 있고(.NET 불필요) 웹·모바일로 내보낼 수 있는 인벤토리에, 수색·공개(H2)와 명령 기반 롤백(H3)을 함께 갖춘 것은 없다.**
+
+이 가설이 의미 있으려면 **세 가지가 확인돼야 한다.** 모두 아직 확인되지 않았다.
+- 웹 내보내기 문제: Godot 4.7의 C# 프로젝트가 웹으로 내보내지는지(안 된다면 CTIS는 웹 대상에서 제외되므로 이 가설이 강해진다).
+- GDScript 사용자 비중과 그중 이 구조를 원하는 사람이 있는지(수요).
+- CTIS가 이미 GDScript 사용자에게 충분한 대안인지(예: 사용자가 .NET 설치를 꺼리는지).
 
 ### 반증 조건
 
 | 방향 | 조건 |
 |---|---|
-| 중단으로 | 유료 Inventory Kit나 유료 5, 9, 10번 소스에 H2(수색·공개)와 H1(컨테이너 아이템 내부 그리드)이 이미 있다. 또는 H2를 구현한 공개 저장소가 나오고 사용 가능한 라이선스다(읽지 못한 저장소 4곳, GitHub 전체 검색 미완). 또는 expressobits의 "RE4 격자"가 컨테이너 아이템 내부 그리드를 포함한다 |
-| 수요 쪽으로 (다음 단계) | 최소 데모(상자 수색 + 조끼·가방 이동)를 처음 보는 사람 1명 이상에게 보여 주고, 설명 없이 이해하고 쓰는지 관찰하는 외부 반응. 이 문서의 기능 중복 판정과는 별개다 |
+| 중단으로 | Godot 4.7 C# 프로젝트가 웹·모바일로 내보내지고 CTIS가 그 용도로 이미 쓰인다. 또는 유료 Inventory Kit·유료 5, 9, 10번 소스 중 하나가 H2를 이미 갖췄다. 또는 H2를 구현한 공개 저장소가 나온다(읽지 못한 저장소 4곳, GitHub 전체 검색 미완) |
+| 진행으로 | 좁혀진 가설의 세 항목이 긍정으로 확인된다. 특히 처음 보는 GDScript 사용자 1명 이상이 최소 데모(상자 수색 + 조끼·가방 이동)를 설명 없이 이해한다는 관찰 기록 |
 
-### 남은 사용자 확인 (보류를 완전히 푸는 데 필요하지는 않음)
+### 남은 확인 항목
 
-1. GitHub 검색 세 개 중 어느 것이 0건이었는지, 나머지는 어떤 결과였는지 알려 주세요(위 3번 보고가 세 검색 모두인지 불분명).
+1. Godot 4.7 C# 웹 내보내기 상태(공식 문서 확인, 네트워크 필요).
+2. CTIS의 H4(마이그레이션) 코드와 중첩 구현, 테스트 존재 여부를 실제 소스로 읽기.
+3. GitHub 검색 세 개 중 어느 것이 0건이었는지 사용자 확인(사용자 보고: "Your search did not match any repositories", 어느 검색인지 불명).
 
 ## 7. 확인하지 못한 항목
 
@@ -167,5 +204,5 @@ GLoot이 **실제로 하는 것**(참고): 격자 제약과 90° 회전, 무게�
 | GLoot GitHub Release 객체, 이슈·PR 목록 | 태그는 `ls-remote`로 확인했으나 Release 페이지·이슈는 보지 못함. 중첩·수색 기능 요청 이슈가 있는지 미확인 |
 | `thunderplugins/inventory-for-godot-4`, `mdos-san/godot-inventory-system`, `Abab-bk/FlowerIventory`, Codeberg `alvlp/modular-inventory` | 클론 실패 또는 시도하지 않음 |
 | Asset Library에 없는 GitHub 저장소, itch.io의 다른 무료 상품, Unity·웹 쪽 | 범위 밖. GitHub 토픽·검색은 요약 도구가 0건을 돌려줘 신뢰하지 않음 |
-| expressobits의 컨테이너 아이템 여부, 멀티플레이 구현 내용 | C++ 소스 전체는 읽지 않음. 검색 히트 없음만 확인 |
-| `MARKET_SCAN.md` 정정 | 거기서 "Asset Library `inventory` 10건"이라 적은 것은 `godot_version=4.3` 필터를 건 값이다. 버전 제한 없이 받으면 **22건, 전부 MIT**다(이번에 API로 다시 확인 ◎). 그 문서는 이 Issue의 수정 범위 밖이라 고치지 않았다 |
+| expressobits의 컨테이너 아이템 여부, `main` 브랜치 C++ 코어 | `addon` 브랜치의 멀티플레이 데모(GDScript)는 읽었으나 C++ 코어는 컨테이너 아이템 구현 여부를 읽지 않음 |
+| `MARKET_SCAN.md`의 Asset Library 건수 | 거기서 "10건"은 `godot_version=4.3` 필터를 건 값이다. 버전 제한 없이 API로 받으면 22건이었으나 리뷰어는 웹 목록이 30건이라고 한다(4-3절). **재현되지 않는 값이며 시장 신호로 쓰지 않는다.** 그 문서는 이 이슈의 수정 범위 밖이라 고치지 않았다 |
