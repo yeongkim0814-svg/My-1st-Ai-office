@@ -40,7 +40,7 @@
 | 항목 | 값 | 근거 | 확인 |
 |---|---|---|---|
 | 마지막 커밋 | 2026-07-14 "Replace quad trees with occupancy maps (#313)", `6b09b87` | `git log -1` | ◎ |
-| 최신 태그 | `v3.0.2` (커밋 2026-07-05). 태그 목록은 v2.4.8, v2.4.9, v3.0.0, v3.0.1, v3.0.2. GitHub "Release" 객체는 확인하지 못함 | `git ls-remote --tags`, `git log -1 v3.0.2` | ◎ 태그 / ✕ 릴리스 |
+| 최신 태그 | `v3.0.2` (커밋 2026-07-05). `git ls-remote --tags https://github.com/peter-kish/gloot`는 v1.0.1부터 v3.0.2까지 42개를 돌려준다(v2.4.0~v2.4.13, v3.0.0~v3.0.2 포함, 재확인 ◎). 가장 최신은 v3.0.2. GitHub "Release" 객체는 확인하지 못함 | `git ls-remote --tags`, `git log -1 v3.0.2` | ◎ 태그 / ✕ 릴리스 |
 | 지원 버전 | Godot 4.4 이상 | [README.md:7](https://github.com/peter-kish/gloot/blob/6b09b87ac07a8536779ef1ab0fafc7e99830f948/README.md#L7) | ◎ |
 | 버전 번호 불일치 | `plugin.cfg`는 3.0.2, Asset Library 항목은 3.0.1 (2025-05-01 수정일). **병기** | [plugin.cfg](https://github.com/peter-kish/gloot/blob/6b09b87ac07a8536779ef1ab0fafc7e99830f948/addons/gloot/plugin.cfg), [Asset Library](https://godotengine.org/asset-library/asset/1368) | ◎ |
 | 구조 | `Inventory`는 Node, `InventoryItem`은 `RefCounted`. 제약(`GridConstraint`, `WeightConstraint`, `ItemCountConstraint`)을 붙여 조합 | [inventory.gd:3-4](https://github.com/peter-kish/gloot/blob/6b09b87ac07a8536779ef1ab0fafc7e99830f948/addons/gloot/core/inventory.gd#L3-L4), [inventory_item.gd:3-4](https://github.com/peter-kish/gloot/blob/6b09b87ac07a8536779ef1ab0fafc7e99830f948/addons/gloot/core/inventory_item.gd#L3-L4), [transition guide](https://github.com/peter-kish/gloot/blob/6b09b87ac07a8536779ef1ab0fafc7e99830f948/docs/gloot_2_to_3_transition_guide.md) | ◎ |
